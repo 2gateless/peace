@@ -1,0 +1,38 @@
+<div id="attack_streaks" class="stats stats-vertical md:stats-horizontal print:stats-horizontal shadow print:shadow-none mb-3 print:mb-8 bg-base-100 [&_.stat]:py-3 [&_.stat]:px-4">
+  <div class="stat" id="current_streak">
+    <div class="stat-title text-xs sm:text-sm"><%= t("streaks.current") %></div>
+    <div class="stat-value text-success text-lg sm:text-2xl">
+      <% if (cycles.ongoing_attack) { %>
+        <span class="text-error"><%= t("streaks.attack_ongoing") %></span>
+      <% } else if (cycles.current_streak !== null) { %>
+        <%= t("charts.days", { count: cycles.current_streak }) %>
+      <% } else { %>
+        —
+      <% } %>
+    </div>
+    <div class="stat-desc">
+      <% if (cycles.last_attack_day) { %>
+        <%= t("streaks.since", { date: formatTime(cycles.last_attack_day, "date") }) %>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="stat" id="longest_streak">
+    <div class="stat-title text-xs sm:text-sm"><%= t("streaks.longest") %></div>
+    <div class="stat-value text-primary text-lg sm:text-2xl">
+      <%= cycles.longest_streak !== null ? t("charts.days", { count: cycles.longest_streak }) : "—" %>
+    </div>
+    <div class="stat-desc"></div>
+  </div>
+
+  <div class="stat" id="attack_days">
+    <div class="stat-title text-xs sm:text-sm"><%= t("streaks.attack_days") %></div>
+    <div class="stat-value text-secondary text-lg sm:text-2xl"><%= cycles.total_attack_days %></div>
+    <div class="stat-desc">
+      <% if (cycles.cycles.length > 0) { %>
+        <%= t("streaks.in_cycles", { count: cycles.cycles.length }) %>
+      <% } %>
+    </div>
+  </div>
+</div>
+

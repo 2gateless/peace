@@ -1,0 +1,94 @@
+<div class="mb-2">
+  <a href="<%= isEdit ? `/medications/${medication.id}` : '/medications' %>" class="btn btn-ghost btn-sm">← <%= t("nav.back") %></a>
+</div>
+
+<div class="card bg-base-100 shadow-md">
+  <div class="card-body p-3 sm:p-4">
+    <form method="post" action="<%= isEdit ? `/medications/${medication.id}` : '/medications' %>" class="space-y-4">
+      <div class="bg-base-200/50 rounded-lg p-3 space-y-2">
+        <label class="text-sm font-semibold block"><%= t("medications.form_name") %></label>
+        <input type="text" name="name" value="<%= medication.name %>" maxlength="60" required class="input input-bordered w-full">
+      </div>
+
+      <fieldset class="bg-base-200/50 rounded-lg p-3">
+        <legend class="text-sm font-semibold mb-2"><%= t("medications.form_kind") %></legend>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <% kinds.forEach((k) => { %>
+            <label class="flex items-center gap-2 rounded-lg bg-base-100 p-2 cursor-pointer">
+              <input type="radio" name="kind" value="<%= k %>" <%= medication.kind === k ? "checked" : "" %> class="radio radio-sm radio-primary">
+              <span class="text-sm font-medium"><%= t(`medications.kinds.${k}`) %></span>
+            </label>
+          <% }) %>
+        </div>
+      </fieldset>
+
+      <div class="bg-base-200/50 rounded-lg p-3 grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm font-semibold block mb-1"><%= t("medications.form_default_dose") %></label>
+          <input type="number" name="default_dose" min="0" step="any" value="<%= medication.default_dose ?? '' %>" class="input input-bordered w-full">
+        </div>
+        <div>
+          <label class="text-sm font-semibold block mb-1"><%= t("medications.form_unit") %></label>
+          <input type="text" name="unit" list="medication_units" value="<%= medication.unit || '' %>" maxlength="20" class="input input-bordered w-full">
+          <datalist id="medication_units">
+            <% units.forEach((u) => { %><option value="<%= u %>"></option><% }) %>
+          </datalist>
+        </div>
+      </div>
+
+      <div class="bg-base-200/50 rounded-lg p-3 space-y-2">
+        <label class="text-sm font-semibold block"><%= t("medications.form_frequency") %></label>
+        <select name="frequency" class="select select-bordered w-full">
+          <% frequencies.forEach((f) => { %>
+            <option value="<%= f %>" <%= medication.frequency === f ? "selected" : "" %>><%= t(`medications.frequencies.${f}`) %></option>
+          <% }) %>
+        </select>
+        <input type="text" name="schedule_note" value="<%= medication.schedule_note || '' %>" maxlength="100" placeholder="<%= t('medications.form_schedule_note') %>" class="input input-bordered w-full">
+      </div>
+
+      <div class="bg-base-200/50 rounded-lg p-3">
+        <span class="text-sm font-semibold block mb-2"><%= t("medications.form_color") %></span>
+        <div class="flex flex-wrap gap-2">
+          <% colors.forEach((c) => { %>
+            <label class="cursor-pointer">
+              <input type="radio" name="color" value="<%= c %>" <%= medication.color === c ? "checked" : "" %> class="peer sr-only">
+              <span class="block w-9 h-9 rounded-full ring-offset-2 ring-offset-base-100 peer-checked:ring-2 peer-checked:ring-base-content" style="background-color: <%= c %>;"></span>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+
+      <% if (isEdit) { %>
+        <label class="flex items-center gap-3 bg-base-200/50 rounded-lg p-3 cursor-pointer">
+          <input type="checkbox" name="archived" value="1" <%= medication.archived_at ? "checked" : "" %> class="toggle">
+          <span class="text-sm font-semibold"><%= t("medications.form_archived") %></span>
+        </label>
+      <% } %>
+
+      <button type="submit" class="btn btn-primary w-full"><%= t("medications.form_save") %></button>
+    </form>
+  </div>
+</div>
+
+<% if (isEdit && otherMedications.length > 0) { %>
+  <div class="card bg-base-100 shadow-md mt-4">
+    <div class="card-body p-3 sm:p-4 gap-2">
+      <h2 class="text-sm font-semibold"><%= t("medications.merge_title") %></h2>
+      <form method="post" action="/medications/<%= medication.id %>/merge" class="flex gap-2">
+        <select name="target_id" class="select select-bordered select-sm flex-1">
+          <% otherMedications.forEach((m) => { %>
+            <option value="<%= m.id %>"><%= m.name %></option>
+          <% }) %>
+        </select>
+        <button type="submit" class="btn btn-sm"><%= t("medications.merge_submit") %></button>
+      </form>
+    </div>
+  </div>
+<% } %>
+
+<% if (isEdit) { %>
+  <form method="post" action="/medications/<%= medication.id %>/delete" class="mt-4" data-confirm="<%= t('medications.delete_confirm', { name: medication.name }) %>">
+    <button type="submit" class="btn btn-outline btn-error w-full"><%= t("medications.delete") %></button>
+  </form>
+<% } %>
+

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="<%= locale %>">
+<head>
+  <meta charset="utf-8">
+  <title><%= title ? `${title} | ${t("app.title")}` : `${t("app.title")} | ${t("app.short_description")}` %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
+  <meta name="description" content="<%= t("app.description") %>">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/favicon/favicon.ico">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="min-h-screen bg-base-200 flex flex-col print:min-h-0 print:h-auto print:overflow-visible print:bg-white"
+      data-locale="<%= locale %>"
+      data-hour-cycle="<%= timeFormat === '12h' ? 'h12' : 'h23' %>">
+  <script type="application/json" id="client-translations"><%- JSON.stringify(clientTranslations) %></script>
+  <%- include("partials/navbar") %>
+  <%- include("partials/flash") %>
+
+  <main class="w-full pt-safe-offset-16 pb-24 flex-grow print:flex-none print:h-auto print:overflow-visible print:pt-0 print:pb-0">
+    <div class="container mx-auto mt-4 px-4 <%= currentUser ? 'pb-safe pb-24' : 'pb-4' %> print:m-0 print:w-full print:p-0 print:max-w-none print:h-auto print:overflow-visible">
+      <% if (currentUser && !hideOngoingBanner) { %>
+        <%- include("partials/ongoing_banner") %>
+      <% } %>
+      <%- body %>
+    </div>
+  </main>
+
+  <% if (currentUser) { %>
+    <%- include("partials/bottom_navbar") %>
+    <%- include("partials/keyboard_shortcuts") %>
+  <% } else { %>
+    <%- include("partials/footer") %>
+  <% } %>
+
+  <script src="/vendor/chart.umd.min.js"></script>
+  <script src="/vendor/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/charts.js"></script>
+</body>
+</html>
+

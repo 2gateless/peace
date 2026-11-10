@@ -1,0 +1,41 @@
+<%
+  const latestStart = logs.length > 0 ? logs.reduce((max, l) => (l.start_time > max ? l.start_time : max), logs[0].start_time) : null;
+  const todayColor = todayCount === 0 || todayCount <= 2
+    ? "hsl(142, 71%, 45%)"
+    : todayCount <= 5
+      ? `hsl(${Math.round(142 - ((todayCount - 2) / 3) * 97)}, ${Math.round(71 + ((todayCount - 2) / 3) * 22)}%, ${Math.round(45 + ((todayCount - 2) / 3) * 2)}%)`
+      : todayCount <= 8
+        ? `hsl(${Math.round(45 * (1 - (todayCount - 5) / 3))}, ${Math.round(93 - ((todayCount - 5) / 3) * 9)}%, ${Math.round(47 + ((todayCount - 5) / 3) * 13)}%)`
+        : "hsl(0, 84%, 60%)";
+  const avgColor = avgIntensity === 0 ? "" : intensityColor(avgIntensity);
+%>
+<div class="grid">
+  <div class="stats stats-vertical md:stats-horizontal print:stats-horizontal shadow print:shadow-none mb-3 print:mb-8 bg-base-100 [&_.stat]:py-3 [&_.stat]:px-4">
+    <div class="stat">
+      <div class="stat-title text-xs sm:text-sm"><%= t("stats.time_since_last") %></div>
+      <div class="stat-value text-info text-lg sm:text-2xl">
+        <% if (latestStart) { %>
+          <span data-timer data-format="short" data-start="<%= latestStart %>">...</span>
+        <% } else { %>
+          <span><%= t("stats.none_yet") %></span>
+        <% } %>
+      </div>
+      <div class="stat-desc"></div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title text-xs sm:text-sm"><%= t("stats.today") %></div>
+      <div class="stat-value text-lg sm:text-2xl" style="color: <%= todayColor %>;"><%= todayCount %></div>
+      <div class="stat-desc"></div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title text-xs sm:text-sm"><%= t("stats.average_intensity") %></div>
+      <div class="stat-value text-lg sm:text-2xl" style="<%= avgColor ? `color: ${avgColor};` : '' %>"><%= avgIntensity %></div>
+      <div class="stat-desc"></div>
+    </div>
+  </div>
+
+  <%- include("streaks") %>
+</div>
+

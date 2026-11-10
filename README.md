@@ -1,159 +1,71 @@
-<div align="center">
-  <img src="app/assets/images/logo_small@2x.png" alt="Cluster Headache Tracker" width="96" height="96">
+# Peace
 
-  <h1>Cluster Headache Tracker</h1>
+개인적으로 사용하기 위해 만든 간이 **두통 기록 & 패턴 트래커** 웹 애플리케이션입니다.
 
-  <p><strong>Fast cluster headache logging, useful charts, and shareable reports.</strong></p>
+## 포크 및 수정 내역 (Fork & Personalization Notice)
 
-  <p>Built by someone with cluster headaches who wanted a better tool.</p>
+이 저장소는 오픈소스 프로젝트인 [crmne/cluster-headache-tracker](https://github.com/crmne/cluster-headache-tracker) (GPL-3.0 라이선스)를 포크한 뒤, **개인 전용 사용 목적**에 맞게 대폭 수정·간소화한 버전입니다.
 
-  <p>
-    <a href="https://github.com/crmne/cluster-headache-tracker/actions/workflows/ci-main.yml"><img src="https://github.com/crmne/cluster-headache-tracker/actions/workflows/ci-main.yml/badge.svg?branch=main" alt="CI"></a>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/crmne/cluster-headache-tracker" alt="License"></a>
-    <a href="https://github.com/sponsors/crmne"><img src="https://img.shields.io/github/sponsors/crmne?label=Sponsor&logo=github" alt="Sponsor"></a>
-  </p>
-</div>
+### 주요 변경 사항
+- **기술 스택 간소화**: Ruby on Rails + PostgreSQL 구성을 **Node.js (Express + EJS + Node 24 내장 `node:sqlite`)** 기반으로 재구축하여, 별도의 Ruby 런타임이나 외부 DB 서버 없이 단일 SQLite 파일(`data/peace.sqlite`)로 간편하게 실행할 수 있습니다.
+- **Gmail(Google OAuth2) 전용 로그인**: 기존 아이디/비밀번호 로그인·회원가입을 제거하고 Google 계정 로그인만 사용하도록 변경했습니다. `.env`의 `ALLOWED_EMAILS` 설정으로 지정한 Gmail 주소만 접근을 허용할 수 있습니다.
+- **불필요한 공개 서비스/SaaS 기능 제거**:
+  - 피드백 설문(`FeedbackSurvey`), 어드민 대시보드, 메일러 제거
+  - GDPR 건강정보 동의(`/consent`), 공지/환영/업데이트 모달 제거
+  - 공유 링크(`ShareToken`), SEO/마케팅 랜딩 페이지, `llms.txt`, 사이트맵, 외부 통계(Plausible)/뉴스레터(Sendfox)/Sentry 연동 제거
+  - Hotwire Native 모바일 앱 브리지 코드 제거
+- **핵심 기능 및 디자인 유지**:
+  - 기존 **Tailwind CSS v4 + DaisyUI v5** 디자인, 다크/라이트 테마, 하단 탭 바, 강도(1~10) 컬러 스케일 유지
+  - 두통 발작 기록(시작/종료 시간, 진행 중 타이머, 강도, 유발 요인, 기압 hPa, 메모, 사진 첨부)
+  - 군발 사이클 & 관해기 분석, 무통증 연속일 통계, 52주 캘린더 히트맵, Chart.js 패턴 차트
+  - 약물 관리(급성기/산소/예방약), 복용 기록, 타임라인, 약물 효과 요약
+  - CSV 가져오기/내보내기(Migraine Buddy 호환), 인쇄 및 PDF 리포트 다운로드
+  - 한국어 / English UI 전환 및 12/24시간 표기 설정
 
 ---
 
-Cluster Headache Tracker is an open source Rails app for logging attacks, reviewing patterns over time, and sharing data with doctors.
+## 실행 방법
 
-The public app lives at [clusterheadachetracker.com](https://clusterheadachetracker.com). This repository contains the web application behind it.
+### 1. 요구 사항
+- **Node.js 24+** (내장 `node:sqlite` 사용)
 
-## Why it exists
-
-This project was built to make tracking cluster headaches less frustrating:
-
-- fast attack logging
-- charts based on the same data you enter day to day
-- CSV import and export
-- expiring share links for doctors or family
-- username-based accounts instead of email-based signup
-
-The app is privacy-focused, runs in Germany, and is available on the web, as a PWA, and through native mobile shells.
-
-## Demo
-
-[![Watch the demo](https://img.youtube.com/vi/4HlsqANZdv8/maxresdefault.jpg)](https://youtu.be/4HlsqANZdv8)
-
-If you want to see the product before running it locally, start there.
-
-## Mobile apps
-
-### iOS
-
-- [Install the beta on TestFlight](https://testflight.apple.com/join/GJsAQqz2)
-- [iOS source code](https://github.com/crmne/cluster-headache-tracker-ios)
-
-### Android
-
-- [Download the beta APK](https://github.com/crmne/cluster-headache-tracker-android/releases/download/v2.1.0/cluster-headache-tracker.apk)
-- [Android source code](https://github.com/crmne/cluster-headache-tracker-android)
-
-## Running locally
-
-Prerequisites:
-
-- Ruby 4.0.9
-- PostgreSQL
-- Node.js
-
-Clone the repository and install dependencies:
-
+### 2. 설치
 ```bash
-git clone https://github.com/crmne/cluster-headache-tracker.git
-cd cluster-headache-tracker
-bundle install
 npm install
+npm run build:css
 ```
 
-Create a `.env` file with the values you need locally:
+### 3. 환경 변수 설정 (`.env`)
+[`.env.example`](.env.example)을 복사해 `.env` 파일을 생성합니다.
 
+```env
+PORT=3000
+SESSION_SECRET=임의의_긴_비밀키
+GOOGLE_CLIENT_ID=구글_클라우드_콘솔_클라이언트_ID
+GOOGLE_CLIENT_SECRET=구글_클라우드_콘솔_클라이언트_시크릿
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+ALLOWED_EMAILS=본인이메일@gmail.com
+```
+
+Google Cloud Console의 OAuth 2.0 클라이언트 설정에서:
+- **승인된 자바스크립트 원본**: `http://localhost:3000`
+- **승인된 리디렉션 URI**: `http://localhost:3000/auth/google/callback`
+- (테스트 모드일 경우) **테스트 사용자**에 본인 Gmail 주소를 등록하세요.
+
+### 4. 서버 실행 및 테스트
 ```bash
-RAILS_MASTER_KEY=...
-POSTGRES_PASSWORD=...
+npm start
+# 또는
+node src/server.js
 ```
 
-Set up PostgreSQL:
-
+테스트 실행:
 ```bash
-bin/rails db:setup_roles
+npm test
 ```
 
-That creates the `cluster_headache_tracker` role plus the development and test databases using `POSTGRES_PASSWORD` from your environment.
+---
 
-If you prefer the older manual fallback:
+## 라이선스
 
-```bash
-./bin/pg_add_user.sh cluster_headache_tracker
-```
-
-Install the repo hook and boot the app:
-
-```bash
-bin/setup-git-hooks
-bin/setup
-```
-
-`bin/setup` installs gems if needed, prepares the database, clears old logs and temp files, and then starts `bin/dev`.
-
-The app runs at `http://localhost:3000`.
-
-If you want a local seeded user, set `SEED_USER_USERNAME` and `SEED_USER_PASSWORD` and run:
-
-```bash
-bin/rails db:seed
-```
-
-## Tests and CI
-
-For normal development:
-
-```bash
-bin/rails test
-bin/rails test:system
-```
-
-For the full local CI pipeline:
-
-```bash
-bin/ci
-```
-
-`bin/ci` runs setup, linting, security checks, migration checks, the test suite, and system tests. The pre-push hook installed by `bin/setup-git-hooks` runs it automatically before pushes.
-
-## Deployment
-
-Deploys are tag-driven.
-
-Create a release tag from `origin/main` with:
-
-```bash
-script/release 1.0.11
-```
-
-That pushes an annotated `v1.0.11` tag. GitHub Actions then deploys that tag to production with Kamal and creates a GitHub Release.
-
-Pushes to `main` do not deploy production.
-
-If you need to deploy manually:
-
-```bash
-bundle exec kamal deploy
-```
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Support
-
-Bug reports and feature requests are welcome in [GitHub Issues](https://github.com/crmne/cluster-headache-tracker/issues).
-
-If the app is useful to you, you can support development here:
-
-[GitHub Sponsors](https://github.com/sponsors/crmne)
-
-## License
-
-Released under the [GNU General Public License v3.0](LICENSE).
+원본 저장소와 동일하게 **GNU General Public License v3.0 (GPL-3.0)** 을 따릅니다. 자세한 내용은 [`LICENSE`](LICENSE) 파일을 참고하세요.

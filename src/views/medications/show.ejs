@@ -1,0 +1,74 @@
+<div class="flex items-center justify-between mb-3">
+  <a href="/medications" class="btn btn-ghost btn-sm">← <%= t("nav.back") %></a>
+  <a href="/medications/<%= medication.id %>/edit" class="btn btn-outline btn-sm"><%= t("medications.edit") %></a>
+</div>
+
+<div class="card bg-base-100 shadow-md mb-4">
+  <div class="card-body p-3 sm:p-4 gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="badge badge-lg gap-2 font-semibold" style="border-color: <%= medication.color %>;">
+        <span class="w-3 h-3 rounded-full" style="background-color: <%= medication.color %>;"></span>
+        <%= medication.name %>
+      </span>
+      <span class="badge badge-ghost"><%= t(`medications.kinds.${medication.kind}`) %></span>
+      <% if (medication.archived_at) { %>
+        <span class="badge badge-outline"><%= t("medications.archived") %></span>
+      <% } %>
+    </div>
+
+    <dl class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+      <div>
+        <dt class="text-xs text-base-content/60"><%= t("medications.form_frequency") %></dt>
+        <dd><%= t(`medications.frequencies.${medication.frequency}`) %></dd>
+      </div>
+      <div>
+        <dt class="text-xs text-base-content/60"><%= t("medications.form_default_dose") %></dt>
+        <dd><%= medication.default_dose !== null && medication.default_dose !== undefined ? `${formatAmount(medication.default_dose)} ${medication.unit || ""}` : "—" %></dd>
+      </div>
+      <% if (summary && summary.success_rate !== null) { %>
+        <div>
+          <dt class="text-xs text-base-content/60"><%= t("medications.success_rate") %></dt>
+          <dd><%= summary.success_rate %>%</dd>
+        </div>
+      <% } %>
+      <% if (summary && summary.average_minutes_to_relief !== null) { %>
+        <div>
+          <dt class="text-xs text-base-content/60"><%= t("medications.avg_relief") %></dt>
+          <dd><%= summary.average_minutes_to_relief %> min</dd>
+        </div>
+      <% } %>
+    </dl>
+
+    <% if (!medication.archived_at) { %>
+      <form method="post" action="/medication_doses">
+        <input type="hidden" name="medication_id" value="<%= medication.id %>">
+        <input type="hidden" name="return_to" value="/medications/<%= medication.id %>">
+        <button type="submit" class="btn btn-primary w-full sm:w-auto"><%= t("medications.took_it") %></button>
+      </form>
+    <% } %>
+  </div>
+</div>
+
+<h2 class="text-lg font-bold mb-2"><%= t("medications.doses_title") %></h2>
+<% if (doses.length > 0) { %>
+  <ul class="card bg-base-100 shadow-md divide-y divide-base-200">
+    <% doses.forEach((dose) => { %>
+      <li class="flex flex-wrap items-center gap-2 px-4 py-2">
+        <span class="text-sm font-medium"><%= formatTime(dose.taken_at) %></span>
+        <span class="text-sm text-base-content/70">
+          <%= [dose.amount !== null && dose.amount !== undefined ? `${formatAmount(dose.amount)} ${dose.unit || ""}`.trim() : null, dose.duration_minutes ? `${dose.duration_minutes} min` : null].filter(Boolean).join(" · ") %>
+        </span>
+        <% if (dose.effectiveness) { %>
+          <span class="badge badge-sm"><%= t(`medications.effectiveness.${dose.effectiveness}`) %></span>
+        <% } %>
+        <% if (dose.attack_intensity) { %>
+          <span class="badge badge-warning badge-sm"><%= dose.attack_intensity %>/10</span>
+        <% } %>
+        <a href="/medication_doses/<%= dose.id %>/edit" class="btn btn-ghost btn-xs ml-auto"><%= t("medications.edit") %></a>
+      </li>
+    <% }) %>
+  </ul>
+<% } else { %>
+  <p class="text-sm text-base-content/70"><%= t("medications.empty") %></p>
+<% } %>
+

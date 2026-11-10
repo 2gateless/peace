@@ -1,0 +1,12 @@
+<% if (flash) { %>
+  <%
+    const cls = flash.type === "error" ? "alert-error" : flash.type === "warning" ? "alert-warning" : "alert-success";
+  %>
+  <div id="flash-messages" class="fixed top-safe-offset-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4 space-y-3 pointer-events-none">
+    <div role="alert" class="alert <%= cls %> shadow-lg relative pr-10 pointer-events-auto" data-flash>
+      <span><%= flash.message %></span>
+      <button type="button" class="btn btn-ghost btn-xs btn-circle absolute right-2 top-2" data-flash-close aria-label="Close">✕</button>
+    </div>
+  </div>
+<% } %>
+

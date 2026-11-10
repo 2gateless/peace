@@ -1,9 +1,33 @@
 {
-  "devDependencies": {
-    "daisyui": "^5",
-    "tailwindcss-safe-area": "^0"
+  "name": "peace",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:css": "tailwindcss -i src/styles/app.css -o public/css/app.css --minify",
+    "watch:css": "tailwindcss -i src/styles/app.css -o public/css/app.css --watch",
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test tests/**/*.test.js"
   },
   "dependencies": {
-    "tailwindcss": "^4"
+    "chart.js": "^4.4.6",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "cookie-parser": "^1.4.7",
+    "csv-parse": "^5.6.0",
+    "csv-stringify": "^6.5.2",
+    "date-fns": "^2.30.0",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "multer": "^1.4.5-lts.2",
+    "pdfkit": "^0.16.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4",
+    "@tailwindcss/typography": "^0.5.16",
+    "daisyui": "^5",
+    "tailwindcss": "^4",
+    "tailwindcss-safe-area": "^1.2.0"
   }
 }

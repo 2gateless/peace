@@ -1,0 +1,24 @@
+<div class="mb-2">
+  <a href="/headache_logs" class="btn btn-ghost btn-sm">← <%= t("nav.back") %></a>
+</div>
+
+<%- include("../partials/headache_card", { log, hideActions: false }) %>
+
+<% if (log.photos && log.photos.length > 0) { %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+    <% log.photos.forEach((photo) => { %>
+      <div class="card bg-base-100 shadow-md overflow-hidden">
+        <figure>
+          <img src="/headache_logs/<%= log.id %>/photos/<%= photo.id %>" alt="<%= photo.original_name %>" class="w-full h-64 object-cover">
+        </figure>
+        <div class="card-body p-2 flex flex-row items-center justify-between">
+          <span class="text-xs truncate text-base-content/70"><%= photo.original_name %></span>
+          <form method="post" action="/headache_logs/<%= log.id %>/photos/<%= photo.id %>/delete">
+            <button type="submit" class="btn btn-ghost btn-xs text-error"><%= t("logs.delete") %></button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+

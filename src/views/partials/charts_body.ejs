@@ -1,0 +1,82 @@
+<% if (logs.length === 0) { %>
+  <div class="text-center py-12">
+    <p class="text-xl text-base-content/60 mb-4"><%= t("charts.no_data") %></p>
+    <a href="/headache_logs/new" class="btn btn-primary"><%= t("logs.new") %></a>
+  </div>
+<% } else { %>
+  <%- include("cycles") %>
+
+  <%
+    const chartsPayload = {
+      ...chartData,
+      remissions: cycles.remissions.map((r) => ({ from: r.start_on, to: r.end_on, days: r.length_in_days }))
+    };
+  %>
+  <div id="charts-root" data-charts-payload="<%= JSON.stringify(chartsPayload) %>">
+    <div class="grid gap-4 grid-cols-1 mb-4">
+      <div class="card bg-base-100 shadow-md print:shadow-none">
+        <div class="card-body p-3 sm:p-4">
+          <h2 class="text-sm sm:text-base font-semibold"><%= t("charts.intensity_title") %></h2>
+          <div class="h-[300px] print:h-[200px]"><canvas id="intensityChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-md print:shadow-none">
+        <div class="card-body p-3 sm:p-4">
+          <h2 class="text-sm sm:text-base font-semibold"><%= t("charts.attacks_per_day_title") %></h2>
+          <div class="h-[300px] print:h-[200px]"><canvas id="attacksPerDayChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-md print:shadow-none">
+        <div class="card-body p-3 sm:p-4">
+          <h2 class="text-sm sm:text-base font-semibold"><%= t("charts.duration_title") %></h2>
+          <div class="h-[300px] print:h-[200px]"><canvas id="durationChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-md print:shadow-none">
+        <div class="card-body p-3 sm:p-4">
+          <h2 class="text-sm sm:text-base font-semibold"><%= t("charts.hourly_title") %></h2>
+          <div class="h-[300px] print:h-[200px]"><canvas id="hourlyChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-4 grid-cols-1 md:grid-cols-2 mb-8">
+      <div class="card bg-base-100 shadow-md print:shadow-none">
+        <div class="card-body p-3 sm:p-4">
+          <h2 class="text-sm sm:text-base font-semibold"><%= t("charts.triggers_title") %></h2>
+          <div class="h-[300px]"><canvas id="triggerChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-md print:shadow-none">
+        <div class="card-body p-3 sm:p-4">
+          <h2 class="text-sm sm:text-base font-semibold"><%= t("charts.medications_title") %></h2>
+          <div class="h-[300px]"><canvas id="medicationChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <% if (chartData.pressure_data && chartData.pressure_data.length > 0) { %>
+      <div class="grid gap-4 grid-cols-1 md:grid-cols-2 mb-8">
+        <div class="card bg-base-100 shadow-md print:shadow-none">
+          <div class="card-body p-3 sm:p-4">
+            <h2 class="text-sm sm:text-base font-semibold"><%= t("charts.pressure_title") %></h2>
+            <div class="h-[300px]"><canvas id="pressureChart"></canvas></div>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-md print:shadow-none">
+          <div class="card-body p-3 sm:p-4">
+            <h2 class="text-sm sm:text-base font-semibold"><%= t("charts.pressure_change_title") %></h2>
+            <div class="h-[300px]"><canvas id="pressureChangeChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <%- include("medication_insights") %>
+  </div>
+<% } %>
+

@@ -1,0 +1,76 @@
+<%
+  const isOngoing = !log.end_time;
+  const cardBg = isOngoing ? "bg-warning/5" : "bg-base-100";
+  const headerBg = isOngoing ? "bg-warning text-warning-content" : "bg-primary text-primary-content";
+%>
+<div class="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-200 <%= cardBg %>">
+  <div class="px-4 py-2 <%= headerBg %> flex items-center justify-between">
+    <a href="/headache_logs/<%= log.id %>" class="text-sm font-semibold hover:underline"><%= formatTime(log.start_time) %></a>
+    <% if (isOngoing) { %>
+      <span class="text-xs font-medium bg-white/20 px-2 py-0.5 rounded"><%= t("logs.ongoing") %></span>
+    <% } else { %>
+      <span class="text-xs opacity-75"><%= formatDuration(log.start_time, log.end_time) %></span>
+    <% } %>
+  </div>
+
+  <div class="p-4">
+    <div class="flex justify-between items-start mb-3">
+      <div class="flex-1 space-y-2">
+        <% if (log.doses && log.doses.length > 0) { %>
+          <div class="bg-primary/5 rounded-lg p-2 flex flex-wrap gap-1.5">
+            <% log.doses.forEach((d) => { %>
+              <span class="badge badge-sm gap-1.5" style="border-color: <%= d.medication_color %>;">
+                <span class="w-2 h-2 rounded-full" style="background-color: <%= d.medication_color %>;"></span>
+                <%= d.medication_name %><% if (d.amount !== null && d.amount !== undefined) { %> <%= formatAmount(d.amount) %> <%= d.unit || "" %><% } %>
+              </span>
+            <% }) %>
+          </div>
+        <% } else if (log.medication) { %>
+          <div class="bg-primary/5 rounded-lg p-2 text-xs"><%= log.medication %></div>
+        <% } %>
+
+        <% if (log.trigger_list && log.trigger_list.length > 0) { %>
+          <div class="bg-secondary/5 rounded-lg p-2 flex flex-wrap gap-1">
+            <% log.trigger_list.forEach((trig) => { %>
+              <span class="badge badge-secondary badge-sm"><%= trig %></span>
+            <% }) %>
+          </div>
+        <% } %>
+
+        <% if (log.barometric_pressure !== null && log.barometric_pressure !== undefined) { %>
+          <div class="bg-info/5 rounded-lg p-2 text-xs"><%= log.barometric_pressure %> hPa</div>
+        <% } %>
+
+        <% if (log.notes) { %>
+          <div class="bg-base-200 rounded-lg p-2 text-xs text-base-content/70 line-clamp-2"><%= log.notes %></div>
+        <% } %>
+
+        <% if (log.photos && log.photos.length > 0) { %>
+          <a href="/headache_logs/<%= log.id %>" class="badge badge-ghost badge-sm">
+            <%= t("logs.photo_count", { count: log.photos.length }) %>
+          </a>
+        <% } %>
+      </div>
+
+      <div class="text-center ml-4">
+        <div class="relative inline-block">
+          <div class="radial-progress shadow-sm" style="--value:<%= Math.round((log.intensity / 10) * 100) %>; --size:2.5rem; color: <%= intensityColor(log.intensity) %>;">
+            <span class="text-base font-bold"><%= log.intensity %></span>
+          </div>
+          <div class="absolute -inset-1 rounded-full opacity-30 blur-sm" style="background-color: <%= intensityColor(log.intensity) %>;"></div>
+        </div>
+        <p class="text-xs text-base-content/60 mt-1"><%= t("logs.intensity") %></p>
+      </div>
+    </div>
+
+    <% if (!hideActions) { %>
+      <div class="flex items-center justify-end gap-1 mt-3 pt-2 border-t border-base-200/50">
+        <a href="/headache_logs/<%= log.id %>/edit" class="btn btn-ghost btn-xs"><%= t("logs.edit") %></a>
+        <form method="post" action="/headache_logs/<%= log.id %>/delete" class="inline" data-confirm="<%= t('logs.delete_confirm') %>">
+          <button type="submit" class="btn btn-ghost btn-xs text-error"><%= t("logs.delete") %></button>
+        </form>
+      </div>
+    <% } %>
+  </div>
+</div>
+

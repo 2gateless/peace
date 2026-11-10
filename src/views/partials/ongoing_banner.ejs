@@ -1,0 +1,21 @@
+<% if (ongoingHeadaches && ongoingHeadaches.length > 0) { %>
+  <div class="space-y-2 mb-4 print:hidden">
+    <% ongoingHeadaches.forEach((attack) => { %>
+      <div class="alert alert-warning shadow-md flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="badge badge-error badge-sm"><%= t("logs.ongoing") %></span>
+          <span class="font-semibold text-sm"><%= t("logs.ongoing_banner_title") %></span>
+          <span class="text-xs opacity-80">(<%= formatTime(attack.start_time) %> · <%= attack.intensity %>/10)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/headache_logs/<%= attack.id %>/edit" class="btn btn-ghost btn-xs"><%= t("logs.edit") %></a>
+          <form method="post" action="/current_attack/end" class="inline">
+            <input type="hidden" name="return_to" value="<%= currentPath %>">
+            <button type="submit" class="btn btn-error btn-xs"><%= t("logs.ongoing_banner_end") %></button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+

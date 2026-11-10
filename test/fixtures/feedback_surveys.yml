@@ -1,8 +1,0 @@
-one:
-  usage_duration: 1-2 months
-  versions: '["Web","iOS"]'
-  most_useful_features: '["Identifying triggers","Exporting data"]'
-  ease_of_use: 4
-  recommendation_likelihood: 5
-  shared_with_doctor: true
-  user: one

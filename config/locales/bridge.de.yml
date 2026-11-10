@@ -1,6 +1,0 @@
-de:
-  bridge:
-    alert:
-      confirm: "OK"
-      destructive_confirm: "Löschen"
-      dismiss: "Abbrechen"

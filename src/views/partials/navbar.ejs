@@ -1,0 +1,50 @@
+<nav class="navbar bg-base-100 border-b border-base-content/10 z-50 pt-safe-offset-2 fixed top-0 print:hidden">
+  <div class="navbar-start">
+    <% if (currentUser) { %>
+      <div class="dropdown lg:hidden">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Menu">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/></svg>
+        </div>
+        <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[100] p-2 shadow bg-base-100 rounded-box w-52">
+          <li><a href="/headache_logs"><%= t("nav.logs") %></a></li>
+          <li><a href="/charts"><%= t("nav.charts") %></a></li>
+          <li><a href="/headache_logs/new"><%= t("nav.new_log") %></a></li>
+          <li><a href="/current_attack"><%= t("current_attack.title") %></a></li>
+          <li><a href="/medications"><%= t("nav.medications") %></a></li>
+          <li><a href="/timeline"><%= t("nav.timeline") %></a></li>
+          <li><a href="/settings"><%= t("nav.settings") %></a></li>
+        </ul>
+      </div>
+    <% } %>
+
+    <a href="<%= currentUser ? '/headache_logs' : '/users/sign_in' %>" class="btn btn-ghost gap-2">
+      <img src="/images/logo_small.png" alt="Peace" width="32" height="32">
+      <span class="font-bold text-sm sm:text-base <%= navbarTitle ? 'hidden sm:inline' : '' %>"><%= t("app.title") %></span>
+    </a>
+  </div>
+
+  <div class="navbar-center">
+    <span class="font-black text-lg"><%= navbarTitle || "" %></span>
+  </div>
+
+  <div class="navbar-end">
+    <% if (currentUser) { %>
+      <% if (webButtonHtml) { %>
+        <%- webButtonHtml %>
+      <% } else { %>
+        <div class="flex items-center gap-3">
+          <a href="/settings" class="hidden md:flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <% if (currentUser.avatar_url) { %>
+              <img src="<%= currentUser.avatar_url %>" alt="" class="w-6 h-6 rounded-full" referrerpolicy="no-referrer">
+            <% } %>
+            <span class="text-sm font-semibold"><%= currentUser.name || currentUser.email %></span>
+          </a>
+          <a href="/headache_logs/new" class="btn btn-primary" aria-keyshortcuts="n">
+            <%= t("nav.new") %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          </a>
+        </div>
+      <% } %>
+    <% } %>
+  </div>
+</nav>

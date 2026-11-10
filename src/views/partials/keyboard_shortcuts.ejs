@@ -1,0 +1,32 @@
+<div id="keyboard-shortcuts-wrapper" class="print:hidden">
+  <dialog id="keyboard_shortcuts" class="modal" aria-labelledby="keyboard_shortcuts_heading">
+    <div class="modal-box">
+      <h2 id="keyboard_shortcuts_heading" class="text-lg font-bold"><%= t("shortcuts.heading") %></h2>
+      <dl class="mt-4 space-y-3">
+        <div class="flex items-center justify-between gap-4">
+          <dt><%= t("shortcuts.new_log") %></dt>
+          <dd><kbd class="kbd">n</kbd></dd>
+        </div>
+        <div class="flex items-center justify-between gap-4">
+          <dt><%= t("shortcuts.current_attack") %></dt>
+          <dd><kbd class="kbd">e</kbd></dd>
+        </div>
+        <div class="flex items-center justify-between gap-4">
+          <dt><%= t("shortcuts.help") %></dt>
+          <dd><kbd class="kbd">?</kbd></dd>
+        </div>
+      </dl>
+      <label class="label mt-6 cursor-pointer gap-3 text-base-content">
+        <input type="checkbox" id="keyboard_shortcuts_toggle" class="toggle toggle-primary" checked>
+        <%= t("shortcuts.enable") %>
+      </label>
+      <div class="modal-action">
+        <form method="dialog">
+          <button class="btn"><%= t("shortcuts.close") %></button>
+        </form>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button tabindex="-1" aria-hidden="true"></button></form>
+  </dialog>
+</div>
+

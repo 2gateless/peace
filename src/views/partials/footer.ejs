@@ -1,0 +1,14 @@
+<footer class="mt-auto bg-base-100 border-t border-base-content/10 print:hidden">
+  <div class="px-4 mx-auto max-w-5xl py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-base-content/70">
+    <div class="flex items-center gap-2">
+      <img src="/images/logo_small.png" alt="Peace" width="24" height="24">
+      <span class="font-semibold"><%= t("app.title") %></span>
+    </div>
+    <nav class="flex flex-wrap items-center gap-3" aria-label="<%= t("nav.language") %>">
+      <% AVAILABLE_LOCALES.forEach((loc) => { %>
+        <a href="<%= currentPath %>?locale=<%= loc %>" class="link link-hover <%= loc === locale ? 'font-bold' : '' %>"><%= t(`languages.${loc}`) %></a>
+      <% }) %>
+    </nav>
+  </div>
+</footer>
+
