@@ -78,12 +78,18 @@ export function upsertGoogleUser(db, profile) {
   return db.prepare("SELECT * FROM users WHERE id = ?").get(info.lastInsertRowid);
 }
 
+function isSecureCookie() {
+  if (process.env.COOKIE_SECURE === "true") return true;
+  if (process.env.COOKIE_SECURE === "false") return false;
+  return String(process.env.GOOGLE_CALLBACK_URL || "").startsWith("https://");
+}
+
 export function setUserSessionCookie(res, userId) {
   const token = encodeSignedToken({ userId, exp: Date.now() + THIRTY_DAYS_MS });
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecureCookie(),
     maxAge: THIRTY_DAYS_MS,
     path: "/"
   });
@@ -110,7 +116,7 @@ export function buildGoogleAuthUrl(req, res) {
   res.cookie(OAUTH_STATE_COOKIE, stateToken, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecureCookie(),
     maxAge: 10 * 60 * 1000,
     path: "/"
   });

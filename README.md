@@ -66,6 +66,24 @@ npm test
 
 ---
 
+## GitHub Actions & Docker 배포
+
+`main` 브랜치에 푸시하면 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)이 자동으로 실행됩니다.
+
+1. **`test`**: Node.js 24 환경에서 CSS 빌드 및 테스트 실행
+2. **`build-and-push`**: Docker 이미지를 빌드해 `ghcr.io/2gateless/peace:latest` (GHCR)에 자동 푸시
+3. **`deploy`** *(선택)*: SSH 원격 서버 자동 배포
+   - 원격 서버 배포 폴더(기본값: `~/peace`)에 `.env` 파일(Google OAuth 콜백 URL을 운영 도메인 `https://도메인/auth/google/callback`으로 설정)을 배치합니다.
+   - GitHub 저장소 **Settings → Secrets and variables → Actions**에서 설정합니다:
+     - **Variables**: `DEPLOY_ENABLED` = `true` (선택: `DEPLOY_PATH`, 기본값 `peace`)
+     - **Secrets**: `SSH_HOST`, `SSH_USER`, `SSH_KEY` (선택: `SSH_PORT`, 기본값 `22`)
+   - 로컬/서버에서 수동 실행 시:
+     ```bash
+     docker compose up -d
+     ```
+
+---
+
 ## 라이선스
 
 원본 저장소와 동일하게 **GNU General Public License v3.0 (GPL-3.0)** 을 따릅니다. 자세한 내용은 [`LICENSE`](LICENSE) 파일을 참고하세요.
