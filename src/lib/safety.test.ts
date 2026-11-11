@@ -100,5 +100,37 @@ describe("peace safety & analytics helpers", () => {
     const json = JSON.parse(exportLogsToJson(logs, DEFAULT_MEDICATIONS));
     expect(json.logs.length).toBe(2);
   });
+
+  it("computes custom multi-month and multi-year statistics accurately", () => {
+    const now = new Date(2026, 10, 11, 12, 0, 0).getTime(); // 2026-11-11
+    const makeLog = (id: string, year: number, monthIndex: number, day: number, painScale: number): DoseLog => ({
+      id,
+      timestamp: new Date(year, monthIndex, day, 10, 0, 0).getTime(),
+      medicationId: "herb_1",
+      medicationName: "허브 1",
+      category: "herb",
+      painScale
+    });
+
+    const logs: DoseLog[] = [
+      makeLog("in-3m", 2026, 8, 15, 2), // 2026-09-15 (~2m ago)
+      makeLog("in-6m", 2026, 5, 10, 4), // 2026-06-10 (~5m ago)
+      makeLog("in-1y", 2025, 11, 1, 6), // 2025-12-01 (~11m ago)
+      makeLog("in-2y", 2024, 11, 1, 8), // 2024-12-01 (~23m ago)
+      makeLog("too-old", 2024, 9, 1, 10) // 2024-10-01 (>2y ago)
+    ];
+
+    expect(computeStats(logs, DEFAULT_MEDICATIONS, "3m", now).totalCount).toBe(1);
+    expect(computeStats(logs, DEFAULT_MEDICATIONS, "6m", now).totalCount).toBe(2);
+
+    const oneYear = computeStats(logs, DEFAULT_MEDICATIONS, "1y", now);
+    expect(oneYear.totalCount).toBe(3);
+    expect(oneYear.avgPainScale).toBe(4);
+    expect(oneYear.dailySeries[0].label).toContain("25.");
+
+    const twoYears = computeStats(logs, DEFAULT_MEDICATIONS, "2y", now);
+    expect(twoYears.totalCount).toBe(4);
+    expect(twoYears.avgPainScale).toBe(5);
+  });
 });
 

@@ -122,17 +122,43 @@ export function groupLogsByDay(logs: DoseLog[]): DayGroup[] {
   });
 }
 
+export type StatsPeriod = 7 | 30 | "3m" | "6m" | "1y" | "2y";
+
+function resolvePeriodStart(nowMs: number, period: StatsPeriod): Date {
+  const startDay = new Date(nowMs);
+  startDay.setHours(0, 0, 0, 0);
+
+  if (typeof period === "number") {
+    startDay.setDate(startDay.getDate() - (period - 1));
+    return startDay;
+  }
+
+  switch (period) {
+    case "3m":
+      startDay.setMonth(startDay.getMonth() - 3);
+      break;
+    case "6m":
+      startDay.setMonth(startDay.getMonth() - 6);
+      break;
+    case "1y":
+      startDay.setFullYear(startDay.getFullYear() - 1);
+      break;
+    case "2y":
+      startDay.setFullYear(startDay.getFullYear() - 2);
+      break;
+  }
+  return startDay;
+}
+
 export function computeStats(
   logs: DoseLog[],
   medications: Medication[],
-  daysWindow: 7 | 30 = 7,
+  period: StatsPeriod = 7,
   nowMs = Date.now()
 ): StatsSummary {
   const endDay = new Date(nowMs);
   endDay.setHours(23, 59, 59, 999);
-  const startDay = new Date(nowMs);
-  startDay.setHours(0, 0, 0, 0);
-  startDay.setDate(startDay.getDate() - (daysWindow - 1));
+  const startDay = resolvePeriodStart(nowMs, period);
 
   const windowLogs = logs.filter((l) => l.timestamp >= startDay.getTime() && l.timestamp <= endDay.getTime());
 
@@ -163,24 +189,30 @@ export function computeStats(
     dayMap.set(key, list);
   }
 
+  const endYear = endDay.getFullYear();
+  const spansMultipleYears = startDay.getFullYear() !== endYear;
   const dailySeries: { date: string; label: string; count: number; avgPain: number | null }[] = [];
-  for (let i = 0; i < daysWindow; i++) {
-    const d = new Date(startDay);
-    d.setDate(startDay.getDate() + i);
-    const key = formatLocalDateKey(d.getTime());
+  const cursor = new Date(startDay);
+  while (cursor.getTime() <= endDay.getTime()) {
+    const key = formatLocalDateKey(cursor.getTime());
     const dayLogs = dayMap.get(key) ?? [];
     const dayPains = dayLogs
       .map((l) => l.painScale)
       .filter((v): v is number => typeof v === "number" && Number.isFinite(v));
+    const dateLabel =
+      spansMultipleYears && cursor.getFullYear() !== endYear
+        ? `${String(cursor.getFullYear()).slice(-2)}.${cursor.getMonth() + 1}/${cursor.getDate()}`
+        : `${cursor.getMonth() + 1}/${cursor.getDate()}`;
     dailySeries.push({
       date: key,
-      label: `${d.getMonth() + 1}/${d.getDate()}`,
+      label: dateLabel,
       count: dayLogs.length,
       avgPain:
         dayPains.length > 0
           ? Number((dayPains.reduce((s, v) => s + v, 0) / dayPains.length).toFixed(1))
           : null
     });
+    cursor.setDate(cursor.getDate() + 1);
   }
 
   return {

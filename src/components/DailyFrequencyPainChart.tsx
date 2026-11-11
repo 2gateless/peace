@@ -17,6 +17,7 @@ export function DailyFrequencyPainChart({ dailySeries, compact = false }: DailyF
     if (!canvasRef.current) return;
 
     const tickSize = compact ? 10 : 12;
+    const isDense = dailySeries.length > 45;
     const chart = new Chart(canvasRef.current, {
       type: "bar",
       data: {
@@ -25,11 +26,11 @@ export function DailyFrequencyPainChart({ dailySeries, compact = false }: DailyF
           {
             label: "투약 횟수",
             data: dailySeries.map((d) => d.count),
-            backgroundColor: "rgba(63, 143, 107, 0.55)",
+            backgroundColor: isDense ? "rgba(63, 143, 107, 0.72)" : "rgba(63, 143, 107, 0.55)",
             borderColor: "#3f8f6b",
-            borderWidth: 1,
-            borderRadius: compact ? 4 : 6,
-            barPercentage: compact ? 0.55 : 0.7
+            borderWidth: isDense ? 0 : 1,
+            borderRadius: isDense ? 2 : compact ? 4 : 6,
+            barPercentage: isDense ? 0.9 : compact ? 0.55 : 0.7
           },
           {
             type: "line",
@@ -37,8 +38,8 @@ export function DailyFrequencyPainChart({ dailySeries, compact = false }: DailyF
             data: dailySeries.map((d) => d.avgPain),
             borderColor: "#d97706",
             backgroundColor: "#d97706",
-            pointRadius: compact ? 2.5 : 3,
-            borderWidth: compact ? 1.75 : 2,
+            pointRadius: isDense ? 1.5 : compact ? 2.5 : 3,
+            borderWidth: compact || isDense ? 1.75 : 2,
             spanGaps: true,
             tension: 0.3,
             yAxisID: "yPain"
@@ -50,7 +51,13 @@ export function DailyFrequencyPainChart({ dailySeries, compact = false }: DailyF
         maintainAspectRatio: false,
         scales: {
           x: {
-            ticks: { color: "#475569", maxRotation: 0, font: { size: tickSize } },
+            ticks: {
+              color: "#475569",
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: compact ? 5 : 7,
+              font: { size: tickSize }
+            },
             grid: { display: false }
           },
           y: {
