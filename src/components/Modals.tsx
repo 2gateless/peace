@@ -1,5 +1,11 @@
 import { useState } from "react";
-import type { MedicationSafetyStatus } from "../lib/safety";
+import {
+  formatElapsed,
+  formatLocalDateKey,
+  getMedicationSafetyStatus,
+  painScaleColor,
+  type MedicationSafetyStatus
+} from "../lib/safety";
 import type { DoseLog, Medication, MedicationCategory } from "../types";
 
 function toLocalDateTimeInput(ms: number): string {
@@ -331,6 +337,199 @@ export function MedicationSettingsModal({
           >
             설정 저장
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Submenu modal opened when tapping a medication tile on the home screen (inspect, add, edit, delete). */
+export function MedicationActionModal({
+  medication,
+  logs,
+  nowMs,
+  onClose,
+  onQuickAdd,
+  onDetailAdd,
+  onEditLog,
+  onDeleteLog
+}: {
+  medication: Medication;
+  logs: DoseLog[];
+  nowMs: number;
+  onClose: () => void;
+  onQuickAdd: () => void;
+  onDetailAdd: () => void;
+  onEditLog: (log: DoseLog) => void;
+  onDeleteLog: (logId: string) => void;
+}) {
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const status = getMedicationSafetyStatus(logs, medication, nowMs);
+  const isHerb = medication.category === "herb";
+  const medLogs = logs
+    .filter((l) => l.medicationId === medication.id)
+    .sort((a, b) => b.timestamp - a.timestamp);
+
+  const todayKey = formatLocalDateKey(nowMs);
+  const timeFmt = new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
+  const dateTimeFmt = new Intl.DateTimeFormat("ko-KR", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+
+  return (
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/35 p-4 backdrop-blur-xs sm:items-center"
+    >
+      <div className="w-full max-w-md space-y-4 rounded-3xl border border-emerald-100 bg-white/95 p-5 shadow-2xl">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${isHerb ? "bg-emerald-600" : "bg-sky-600"}`} />
+              <h3 className="truncate text-base font-semibold text-slate-800">{medication.name}</h3>
+              <span
+                className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                  status.isAtDailyLimit
+                    ? "bg-orange-100 text-orange-800"
+                    : status.dailyCount > 0
+                      ? isHerb
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-sky-100 text-sky-800"
+                      : "bg-slate-100 text-slate-500"
+                }`}
+              >
+                오늘 {status.dailyCount}/{medication.dailyMaxLimit}회
+              </span>
+            </div>
+            <p className="mt-0.5 truncate text-xs text-slate-500">{medication.subtitle}</p>
+          </div>
+          <button type="button" onClick={onClose} className="shrink-0 text-sm text-slate-500 hover:text-slate-900">
+            닫기
+          </button>
+        </div>
+
+        {status.needsWarning && (
+          <div className="rounded-2xl bg-amber-50/90 px-3 py-2 text-xs text-amber-800">
+            {status.isWithinInterval
+              ? `권장 간격(${medication.minIntervalHours}시간) 중 · ${status.formattedRemaining} 남음`
+              : `오늘 권장 최대 횟수(${medication.dailyMaxLimit}회)에 도달했습니다`}
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={onQuickAdd}
+            className="rounded-full bg-emerald-600 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+          >
+            + 지금 투약 추가
+          </button>
+          <button
+            type="button"
+            onClick={onDetailAdd}
+            className="rounded-full border border-emerald-200 bg-emerald-50/70 py-2.5 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
+          >
+            + 상세 추가
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-medium text-slate-600">투약 기록 ({medLogs.length}건)</h4>
+            {status.formattedElapsed && (
+              <span className="text-[11px] text-slate-400">최근: {status.formattedElapsed}</span>
+            )}
+          </div>
+
+          {medLogs.length === 0 ? (
+            <p className="rounded-2xl bg-slate-50 py-6 text-center text-xs text-slate-400">
+              아직 기록된 투약 내역이 없습니다.
+            </p>
+          ) : (
+            <ul className="max-h-60 space-y-2 overflow-y-auto pr-0.5">
+              {medLogs.slice(0, 20).map((log) => {
+                const timeLabel =
+                  formatLocalDateKey(log.timestamp) === todayKey
+                    ? `오늘 ${timeFmt.format(new Date(log.timestamp))}`
+                    : dateTimeFmt.format(new Date(log.timestamp));
+                const confirming = confirmDeleteId === log.id;
+
+                return (
+                  <li key={log.id} className="rounded-2xl border border-slate-200/80 bg-slate-50/70 px-3 py-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-xs font-semibold text-slate-800">{timeLabel}</span>
+                          {log.dose && (
+                            <span className="rounded-full bg-white px-2 py-0.5 text-[11px] text-slate-600">
+                              {log.dose}
+                            </span>
+                          )}
+                          {log.painScale !== null && log.painScale !== undefined && (
+                            <span
+                              className="rounded-full px-2 py-0.5 text-[11px] font-semibold text-white"
+                              style={{ backgroundColor: painScaleColor(log.painScale) }}
+                            >
+                              통증 {log.painScale}/10
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          {formatElapsed(nowMs - log.timestamp)}
+                          {log.notes ? ` · ${log.notes}` : ""}
+                        </p>
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => onEditLog(log)}
+                          className="rounded-lg px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
+                        >
+                          수정
+                        </button>
+                        {confirming ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setConfirmDeleteId(null);
+                                onDeleteLog(log.id);
+                              }}
+                              className="rounded-lg bg-orange-600 px-2 py-1 text-xs font-semibold text-white hover:bg-orange-700"
+                            >
+                              확인
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="rounded-lg px-1.5 py-1 text-xs text-slate-500 hover:bg-slate-200"
+                            >
+                              취소
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDeleteId(log.id)}
+                            className="rounded-lg px-2 py-1 text-xs text-slate-500 hover:bg-orange-50 hover:text-orange-700"
+                          >
+                            삭제
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       </div>
     </div>

@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { Header } from "./components/Header";
-import { DoseDetailModal, MedicationSettingsModal, SafetyWarningModal } from "./components/Modals";
+import {
+  DoseDetailModal,
+  MedicationActionModal,
+  MedicationSettingsModal,
+  SafetyWarningModal
+} from "./components/Modals";
 import { PeaceScenery } from "./components/PeaceScenery";
 import { QuickLogView } from "./components/QuickLogView";
 import { StatsView } from "./components/StatsView";
@@ -34,6 +39,7 @@ export default function App() {
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [toast, setToast] = useState<string | null>(null);
 
+  const [actionMed, setActionMed] = useState<Medication | null>(null);
   const [warningMed, setWarningMed] = useState<Medication | null>(null);
   const [detailTarget, setDetailTarget] = useState<{ med: Medication; editing: DoseLog | null } | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -176,7 +182,7 @@ export default function App() {
               medications={medications}
               logs={logs}
               nowMs={nowMs}
-              onQuickTap={handleQuickTap}
+              onSelectMedication={(med) => setActionMed(med)}
               onOpenDetailed={(med) => setDetailTarget({ med, editing: null })}
               onOpenHeadacheOnly={() => setDetailTarget({ med: medications[0], editing: null })}
               onOpenMedSettings={() => setShowSettings(true)}
@@ -228,6 +234,31 @@ export default function App() {
           </div>
         </nav>
       </div>
+
+      {actionMed && (
+        <MedicationActionModal
+          medication={actionMed}
+          logs={logs}
+          nowMs={nowMs}
+          onClose={() => setActionMed(null)}
+          onQuickAdd={() => {
+            const med = actionMed;
+            setActionMed(null);
+            handleQuickTap(med);
+          }}
+          onDetailAdd={() => {
+            const med = actionMed;
+            setActionMed(null);
+            setDetailTarget({ med, editing: null });
+          }}
+          onEditLog={(log) => {
+            const med = actionMed;
+            setActionMed(null);
+            setDetailTarget({ med, editing: log });
+          }}
+          onDeleteLog={(id) => void handleDeleteLog(id)}
+        />
+      )}
 
       {warningMed && (
         <SafetyWarningModal

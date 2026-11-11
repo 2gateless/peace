@@ -6,7 +6,7 @@ interface QuickLogViewProps {
   medications: Medication[];
   logs: DoseLog[];
   nowMs: number;
-  onQuickTap: (med: Medication) => void;
+  onSelectMedication: (med: Medication) => void;
   onOpenDetailed: (med: Medication) => void;
   onOpenHeadacheOnly: () => void;
   onOpenMedSettings: () => void;
@@ -16,7 +16,7 @@ export function QuickLogView({
   medications,
   logs,
   nowMs,
-  onQuickTap,
+  onSelectMedication,
   onOpenDetailed,
   onOpenHeadacheOnly,
   onOpenMedSettings
@@ -42,7 +42,7 @@ export function QuickLogView({
       >
         <button
           type="button"
-          onClick={() => onQuickTap(med)}
+          onClick={() => onSelectMedication(med)}
           className={`flex w-full flex-1 flex-col justify-between text-left ${
             compact ? "px-2 py-2" : "px-2.5 py-2"
           }`}
