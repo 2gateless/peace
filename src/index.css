@@ -18,6 +18,11 @@
   background: linear-gradient(180deg, #dff0fb 0%, #eef7fb 46%, #eaf5ee 78%, #dceee2 100%);
 }
 
+.peace-wordmark {
+  font-family: "Quicksand", "Nunito", ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", sans-serif;
+  letter-spacing: 0.06em;
+}
+
 .zen-card {
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(14px);

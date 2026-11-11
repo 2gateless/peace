@@ -86,3 +86,4 @@ export function DailyFrequencyPainChart({ dailySeries, compact = false }: DailyF
 
   return <canvas ref={canvasRef} />;
 }
+

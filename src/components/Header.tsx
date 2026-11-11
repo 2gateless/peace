@@ -24,7 +24,9 @@ export function Header({
         <div className="flex items-center gap-2">
           <PeaceDoveIcon className="h-8 w-8 shrink-0" />
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold tracking-tight text-slate-800">peace</span>
+            <span className="peace-wordmark text-[25px] font-bold leading-none text-[#8b7cf6]">
+              PEACE
+            </span>
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
                 firebaseConfigured && user && !user.isMock

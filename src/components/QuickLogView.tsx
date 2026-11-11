@@ -108,7 +108,7 @@ export function QuickLogView({
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-9.5rem)] flex-col justify-between gap-3">
+    <div className="flex min-h-[calc(100vh-9.5rem)] flex-col justify-between gap-2.5">
       {/* Compact peaceful overview */}
       <section className="zen-card rounded-2xl px-4 py-3">
         <div className="flex items-center justify-between gap-3">
@@ -143,14 +143,14 @@ export function QuickLogView({
         </div>
       </section>
 
-      {/* Subtle mid-screen chart with peaceful breathing room */}
-      <section aria-label="일자별 투약 빈도 및 평균 통증" className="my-auto px-2 py-2">
-        <div className="zen-card rounded-2xl px-3.5 py-2.5">
-          <div className="mb-1.5 flex items-center justify-between">
+      {/* Mid-screen daily chart (~1.5x larger, gentle breathing room) */}
+      <section aria-label="일자별 투약 빈도 및 평균 통증" className="my-auto py-1">
+        <div className="zen-card rounded-2xl px-4 py-3">
+          <div className="mb-2 flex items-center justify-between">
             <h2 className="text-xs font-medium text-slate-700">일자별 투약 빈도 & 평균 통증</h2>
             <span className="text-[10px] text-slate-400">최근 7일</span>
           </div>
-          <div className="h-28 sm:h-32">
+          <div className="h-44 sm:h-48">
             <DailyFrequencyPainChart dailySeries={weeklyStats.dailySeries} compact />
           </div>
         </div>
