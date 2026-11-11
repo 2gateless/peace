@@ -1,86 +1,48 @@
-# Peace
+# peace
 
-개인적으로 사용하기 위해 만든 간이 **두통 기록 & 패턴 트래커** 웹 애플리케이션입니다.
+두통 양상과 복용 약물(허브류·진통제)의 투약 시기, 일일 횟수, 안전 간격을 차분하고 직관적으로 기록·추적하는 개인용 **두통 및 투약 관리 PWA**입니다.
 
 ## 포크 및 수정 내역 (Fork & Personalization Notice)
 
-이 저장소는 오픈소스 프로젝트인 [crmne/cluster-headache-tracker](https://github.com/crmne/cluster-headache-tracker) (GPL-3.0 라이선스)를 포크한 뒤, **개인 전용 사용 목적**에 맞게 대폭 수정·간소화한 버전입니다.
+이 저장소는 오픈소스 프로젝트인 [crmne/cluster-headache-tracker](https://github.com/crmne/cluster-headache-tracker) (GPL-3.0 라이선스)에서 출발한 개인 저장소(`2gateless/peace`)로, **개인 전용 두통/투약 관리 목적**에 맞게 전면 재설계되었습니다.
 
-### 주요 변경 사항
-- **기술 스택 간소화**: Ruby on Rails + PostgreSQL 구성을 **Node.js (Express + EJS + Node 24 내장 `node:sqlite`)** 기반으로 재구축하여, 별도의 Ruby 런타임이나 외부 DB 서버 없이 단일 SQLite 파일(`data/peace.sqlite`)로 간편하게 실행할 수 있습니다.
-- **Gmail(Google OAuth2) 전용 로그인**: 기존 아이디/비밀번호 로그인·회원가입을 제거하고 Google 계정 로그인만 사용하도록 변경했습니다. `.env`의 `ALLOWED_EMAILS` 설정으로 지정한 Gmail 주소만 접근을 허용할 수 있습니다.
-- **불필요한 공개 서비스/SaaS 기능 제거**:
-  - 피드백 설문(`FeedbackSurvey`), 어드민 대시보드, 메일러 제거
-  - GDPR 건강정보 동의(`/consent`), 공지/환영/업데이트 모달 제거
-  - 공유 링크(`ShareToken`), SEO/마케팅 랜딩 페이지, `llms.txt`, 사이트맵, 외부 통계(Plausible)/뉴스레터(Sendfox)/Sentry 연동 제거
-  - Hotwire Native 모바일 앱 브리지 코드 제거
-- **핵심 기능 및 디자인 유지**:
-  - 기존 **Tailwind CSS v4 + DaisyUI v5** 디자인, 다크/라이트 테마, 하단 탭 바, 강도(1~10) 컬러 스케일 유지
-  - 두통 발작 기록(시작/종료 시간, 진행 중 타이머, 강도, 유발 요인, 기압 hPa, 메모, 사진 첨부)
-  - 군발 사이클 & 관해기 분석, 무통증 연속일 통계, 52주 캘린더 히트맵, Chart.js 패턴 차트
-  - 약물 관리(급성기/산소/예방약), 복용 기록, 타임라인, 약물 효과 요약
-  - CSV 가져오기/내보내기(Migraine Buddy 호환), 인쇄 및 PDF 리포트 다운로드
-  - 한국어 / English UI 전환 및 12/24시간 표기 설정
+### 주요 특징
+- **미니멀 & 젠(Zen) 다크 테마 (`peace`)**: 두통 시 눈의 피로를 줄여주는 딥 슬레이트(`#090d16`, `#0f172a`) & 올리브/세이지 그린(`#84a98c`, `#52796f`) 팔레트와 오리가미 비둘기(Peace Dove & Olive Arc) SVG 아이콘.
+- **엄지 영역(Thumb Zone) 원클릭 투약 기록**: 하단에 배치된 5개 기본 캡슐 버튼(`허브 1`, `허브 2`, `허브 3`, `진통제 1`, `진통제 2`)을 한 손으로 터치해 즉시 기록하고, 약물 이름·라벨·최소 간격·일일 한도를 자유롭게 커스터마이징할 수 있습니다.
+- **안전 복용 간격 & 일일 카운터**: 자정 기준 오늘 복용 횟수 배지, 마지막 복용 후 경과 시간(`3시간 20분 전 복용`), 권장 간격 내/일일 한도 초과 시 경고 모달 표시.
+- **타임라인, 패턴 통계, CSV/JSON 내보내기**: 일자별 역순 타임라인(수정/삭제), 최근 7일/30일 Chart.js 통계, CSV/JSON 로컬 다운로드 지원.
+- **Firebase Auth + Offline-First Firestore + GitHub Pages**:
+  - Firebase Google 로그인 및 `/users/{uid}/medications`, `/users/{uid}/logs` 사용자별 격리([`firestore.rules`](firestore.rules)).
+  - IndexedDB 오프라인 우선 캐싱 지원 (`VITE_FIREBASE_*` 미설정 시 로컬 브라우저 저장소 및 모의 Google 로그인 모드로 즉시 동작).
+  - `main` 브랜치 푸시 시 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)이 테스트·빌드 후 GitHub Pages(`actions/deploy-pages@v4`)에 자동 배포.
 
 ---
 
-## 실행 방법
+## 개발 및 실행
 
-### 1. 요구 사항
-- **Node.js 24+** (내장 `node:sqlite` 사용)
-
-### 2. 설치
+### 1. 설치 및 로컬 실행
 ```bash
 npm install
-npm run build:css
+npm run dev
 ```
 
-### 3. 환경 변수 설정 (`.env`)
-[`.env.example`](.env.example)을 복사해 `.env` 파일을 생성합니다.
-
-```env
-PORT=3000
-SESSION_SECRET=임의의_긴_비밀키
-GOOGLE_CLIENT_ID=구글_클라우드_콘솔_클라이언트_ID
-GOOGLE_CLIENT_SECRET=구글_클라우드_콘솔_클라이언트_시크릿
-GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
-ALLOWED_EMAILS=본인이메일@gmail.com
-```
-
-Google Cloud Console의 OAuth 2.0 클라이언트 설정에서:
-- **승인된 자바스크립트 원본**: `http://localhost:3000`
-- **승인된 리디렉션 URI**: `http://localhost:3000/auth/google/callback`
-- (테스트 모드일 경우) **테스트 사용자**에 본인 Gmail 주소를 등록하세요.
-
-### 4. 서버 실행 및 테스트
-```bash
-npm start
-# 또는
-node src/server.js
-```
-
-테스트 실행:
+### 2. 테스트 및 프로덕션 빌드
 ```bash
 npm test
+npm run build
 ```
 
----
-
-## GitHub Actions & Docker 배포
-
-`main` 브랜치에 푸시하면 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)이 자동으로 실행됩니다.
-
-1. **`test`**: Node.js 24 환경에서 CSS 빌드 및 테스트 실행
-2. **`build-and-push`**: Docker 이미지를 빌드해 `ghcr.io/2gateless/peace:latest` (GHCR)에 자동 푸시
-3. **`deploy`** *(선택)*: SSH 원격 서버 자동 배포
-   - 원격 서버 배포 폴더(기본값: `~/peace`)에 `.env` 파일(Google OAuth 콜백 URL을 운영 도메인 `https://도메인/auth/google/callback`으로 설정)을 배치합니다.
-   - GitHub 저장소 **Settings → Secrets and variables → Actions**에서 설정합니다:
-     - **Variables**: `DEPLOY_ENABLED` = `true` (선택: `DEPLOY_PATH`, 기본값 `peace`)
-     - **Secrets**: `SSH_HOST`, `SSH_USER`, `SSH_KEY` (선택: `SSH_PORT`, 기본값 `22`)
-   - 로컬/서버에서 수동 실행 시:
-     ```bash
-     docker compose up -d
-     ```
+### 3. Firebase & GitHub Pages 배포 설정
+1. 로컬 개발 시 [`.env.example`](.env.example)을 복사해 `.env` 파일을 만들고 Firebase 웹 앱 설정값을 입력합니다.
+2. GitHub 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 설정합니다.
+3. GitHub 저장소 **Settings → Secrets and variables → Actions**에 아래 6개 Secret을 등록합니다:
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_STORAGE_BUCKET`
+   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+   - `VITE_FIREBASE_APP_ID`
+4. Firebase Console의 **Firestore Database → Rules**에 [`firestore.rules`](firestore.rules) 내용을 반영하고, **Authentication → Sign-in method**에서 **Google**을 활성화합니다(승인된 도메인에 `2gateless.github.io` 추가).
 
 ---
 

@@ -1,6 +1,7 @@
 /node_modules/
-/data/
-/storage/uploads/
+/dist/
+tsconfig.tsbuildinfo
 .env
-.env.local
+.env.*
+!.env.example
 .claude/
