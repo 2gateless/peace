@@ -1,9 +1,11 @@
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import {
   getAuth,
+  getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   type Auth
 } from "firebase/auth";
@@ -48,6 +50,7 @@ if (isFirebaseConfigured) {
   db = initializeFirestore(app, {
     localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
   });
+  void getRedirectResult(auth).catch(() => undefined);
 }
 
 const LOCAL_MEDS_KEY = "peace_local_medications_v1";
@@ -73,6 +76,11 @@ function writeLocal(key: string, value: unknown) {
 
 export function subscribeAuth(callback: (user: AuthUser | null) => void): () => void {
   if (auth) {
+    try {
+      localStorage.removeItem(LOCAL_MOCK_USER_KEY);
+    } catch {
+      // Ignore
+    }
     return onAuthStateChanged(auth, (fbUser) => {
       if (!fbUser) {
         callback(null);
@@ -95,13 +103,22 @@ export async function signInWithGoogle(): Promise<AuthUser | null> {
   if (auth) {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
-    const cred = await signInWithPopup(auth, provider);
-    return {
-      uid: cred.user.uid,
-      displayName: cred.user.displayName,
-      email: cred.user.email,
-      photoURL: cred.user.photoURL
-    };
+    try {
+      const cred = await signInWithPopup(auth, provider);
+      return {
+        uid: cred.user.uid,
+        displayName: cred.user.displayName,
+        email: cred.user.email,
+        photoURL: cred.user.photoURL
+      };
+    } catch (err: unknown) {
+      const code = typeof err === "object" && err && "code" in err ? String((err as { code: unknown }).code) : "";
+      if (code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment") {
+        await signInWithRedirect(auth, provider);
+        return null;
+      }
+      throw err;
+    }
   }
 
   const mockUser: AuthUser = {
@@ -202,3 +219,4 @@ export async function deleteDoseLog(uid: string | null, logId: string): Promise<
     current.filter((l) => l.id !== logId)
   );
 }
+
