@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Chart, registerables } from "chart.js";
 import { computeStats } from "../lib/safety";
 import type { DoseLog, Medication } from "../types";
+import { DailyFrequencyPainChart } from "./DailyFrequencyPainChart";
 
 Chart.register(...registerables);
 
@@ -13,13 +14,11 @@ interface StatsViewProps {
 export function StatsView({ logs, medications }: StatsViewProps) {
   const [windowDays, setWindowDays] = useState<7 | 30>(7);
   const ratioCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const dailyCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const stats = computeStats(logs, medications, windowDays);
 
   useEffect(() => {
     let ratioChart: Chart | null = null;
-    let dailyChart: Chart | null = null;
 
     if (ratioCanvasRef.current && stats.byMedication.length > 0) {
       ratioChart = new Chart(ratioCanvasRef.current, {
@@ -45,62 +44,10 @@ export function StatsView({ logs, medications }: StatsViewProps) {
       });
     }
 
-    if (dailyCanvasRef.current) {
-      dailyChart = new Chart(dailyCanvasRef.current, {
-        type: "bar",
-        data: {
-          labels: stats.dailySeries.map((d) => d.label),
-          datasets: [
-            {
-              label: "투약 횟수",
-              data: stats.dailySeries.map((d) => d.count),
-              backgroundColor: "rgba(63, 143, 107, 0.55)",
-              borderColor: "#3f8f6b",
-              borderWidth: 1,
-              borderRadius: 6
-            },
-            {
-              type: "line",
-              label: "평균 통증",
-              data: stats.dailySeries.map((d) => d.avgPain),
-              borderColor: "#d97706",
-              backgroundColor: "#d97706",
-              spanGaps: true,
-              tension: 0.3,
-              yAxisID: "yPain"
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { ticks: { color: "#475569", maxRotation: 0 }, grid: { display: false } },
-            y: {
-              beginAtZero: true,
-              ticks: { color: "#3f8f6b", stepSize: 1 },
-              grid: { color: "rgba(100, 116, 139, 0.12)" }
-            },
-            yPain: {
-              position: "right",
-              min: 0,
-              max: 10,
-              ticks: { color: "#d97706" },
-              grid: { display: false }
-            }
-          },
-          plugins: {
-            legend: { labels: { color: "#334155", boxWidth: 12 } }
-          }
-        }
-      });
-    }
-
     return () => {
       ratioChart?.destroy();
-      dailyChart?.destroy();
     };
-  }, [stats.byMedication, stats.dailySeries]);
+  }, [stats.byMedication]);
 
   return (
     <div className="space-y-4">
@@ -144,7 +91,7 @@ export function StatsView({ logs, medications }: StatsViewProps) {
       <div className="zen-card rounded-3xl p-4">
         <h3 className="mb-3 text-sm font-medium text-slate-700">일자별 투약 빈도 & 평균 통증</h3>
         <div className="h-56">
-          <canvas ref={dailyCanvasRef} />
+          <DailyFrequencyPainChart dailySeries={stats.dailySeries} />
         </div>
       </div>
 

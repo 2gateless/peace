@@ -20,11 +20,11 @@ export function Header({
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-emerald-900/10 bg-white/75 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-2.5">
+      <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-2">
         <div className="flex items-center gap-2">
           <PeaceDoveIcon className="h-8 w-8 shrink-0" />
           <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold tracking-tight text-slate-800">peace</span>
+            <span className="text-2xl font-bold tracking-tight text-slate-800">peace</span>
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
                 firebaseConfigured && user && !user.isMock
