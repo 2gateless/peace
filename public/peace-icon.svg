@@ -1,8 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
-  <rect width="128" height="128" rx="32" fill="#090d16"/>
-  <circle cx="64" cy="64" r="46" stroke="#52796f" stroke-opacity="0.35" stroke-width="2.5"/>
-  <path d="M26 78C38 92 60 98 84 90C96 86 104 78 108 70" stroke="#84a98c" stroke-width="3.5" stroke-linecap="round"/>
-  <path d="M36 68L58 46L78 52L96 34L86 60L100 68L72 74L52 84L58 68L36 68Z" fill="#84a98c" fill-opacity="0.18" stroke="#84a98c" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M58 46L66 28L78 52" stroke="#cad2c5" stroke-width="2.5" stroke-linejoin="round"/>
-  <circle cx="88" cy="44" r="2.2" fill="#cad2c5"/>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#cfe9f7"/>
+      <stop offset="68%" stop-color="#eef7f3"/>
+      <stop offset="100%" stop-color="#cbe6d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="32" fill="url(#sky)"/>
+  <path d="M22 92C44 80 84 82 106 94V104C106 112 100 118 92 118H36C28 118 22 112 22 104V92Z" fill="#76b58f" fill-opacity="0.45"/>
+  <path d="M26 76C38 56 64 46 92 56" stroke="#7ec4cf" stroke-opacity="0.45" stroke-width="4" stroke-linecap="round"/>
+  <path d="M30 80C42 62 65 54 90 62" stroke="#8ecaa6" stroke-opacity="0.45" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M38 66L58 46L78 52L96 34L86 60L100 68L72 74L52 82L58 66L38 66Z" fill="#ffffff" fill-opacity="0.88" stroke="#2f7a5a" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M58 46L66 29L78 52" stroke="#2f7a5a" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="88" cy="44" r="2.2" fill="#2f7a5a"/>
 </svg>

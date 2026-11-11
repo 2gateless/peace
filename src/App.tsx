@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Header } from "./components/Header";
 import { DoseDetailModal, MedicationSettingsModal, SafetyWarningModal } from "./components/Modals";
+import { PeaceScenery } from "./components/PeaceScenery";
 import { QuickLogView } from "./components/QuickLogView";
 import { StatsView } from "./components/StatsView";
 import { TimelineView } from "./components/TimelineView";
@@ -150,80 +151,83 @@ export default function App() {
   };
 
   return (
-    <div className="ambient-glow flex min-h-screen flex-col bg-[#090d16] text-slate-100">
-      <Header
-        user={user}
-        firebaseConfigured={isFirebaseConfigured}
-        canInstallPwa={Boolean(installPrompt)}
-        onInstallPwa={() => void handleInstallPwa()}
-        onSignIn={() => void handleSignIn()}
-        onSignOut={() => void handleSignOut()}
-      />
+    <div className="peace-backdrop relative flex min-h-screen flex-col text-slate-800">
+      <PeaceScenery />
 
-      {toast && (
-        <div className="fixed left-1/2 top-16 z-50 -translate-x-1/2 rounded-full border border-[#84a98c]/40 bg-[#0f172a]/95 px-4 py-2 text-xs font-medium text-[#cad2c5] shadow-xl backdrop-blur">
-          {toast}
-        </div>
-      )}
+      <div className="relative z-10 flex min-h-screen flex-col">
+        <Header
+          user={user}
+          firebaseConfigured={isFirebaseConfigured}
+          canInstallPwa={Boolean(installPrompt)}
+          onInstallPwa={() => void handleInstallPwa()}
+          onSignIn={() => void handleSignIn()}
+          onSignOut={() => void handleSignOut()}
+        />
 
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-24 pt-4">
-        {tab === "quick" && (
-          <QuickLogView
-            medications={medications}
-            logs={logs}
-            nowMs={nowMs}
-            onQuickTap={handleQuickTap}
-            onOpenDetailed={(med) => setDetailTarget({ med, editing: null })}
-            onOpenHeadacheOnly={() => setDetailTarget({ med: medications[0], editing: null })}
-            onOpenMedSettings={() => setShowSettings(true)}
-          />
+        {toast && (
+          <div className="fixed left-1/2 top-16 z-50 -translate-x-1/2 rounded-full border border-emerald-200 bg-white/95 px-4 py-2 text-xs font-medium text-emerald-800 shadow-lg backdrop-blur">
+            {toast}
+          </div>
         )}
 
-        {tab === "timeline" && (
-          <TimelineView
-            logs={logs}
-            medications={medications}
-            onEditLog={(log) => {
-              const med = medications.find((m) => m.id === log.medicationId) || medications[0];
-              setDetailTarget({ med, editing: log });
-            }}
-            onDeleteLog={(id) => void handleDeleteLog(id)}
-          />
-        )}
+        <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-24 pt-4">
+          {tab === "quick" && (
+            <QuickLogView
+              medications={medications}
+              logs={logs}
+              nowMs={nowMs}
+              onQuickTap={handleQuickTap}
+              onOpenDetailed={(med) => setDetailTarget({ med, editing: null })}
+              onOpenHeadacheOnly={() => setDetailTarget({ med: medications[0], editing: null })}
+              onOpenMedSettings={() => setShowSettings(true)}
+            />
+          )}
 
-        {tab === "stats" && <StatsView logs={logs} medications={medications} />}
-      </main>
+          {tab === "timeline" && (
+            <TimelineView
+              logs={logs}
+              medications={medications}
+              onEditLog={(log) => {
+                const med = medications.find((m) => m.id === log.medicationId) || medications[0];
+                setDetailTarget({ med, editing: log });
+              }}
+              onDeleteLog={(id) => void handleDeleteLog(id)}
+            />
+          )}
 
-      {/* Thumb-Zone Bottom Tab Bar */}
-      <nav
-        aria-label="주요 메뉴"
-        className="fixed bottom-0 left-0 right-0 z-30 border-t border-[#84a98c]/15 bg-[#090d16]/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
-      >
-        <div className="mx-auto grid max-w-2xl grid-cols-3">
-          {(
-            [
-              { id: "quick", label: "투약 기록" },
-              { id: "timeline", label: "타임라인" },
-              { id: "stats", label: "패턴 통계" }
-            ] as const
-          ).map((item) => {
-            const active = tab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setTab(item.id)}
-                className={`py-3.5 text-center text-xs font-semibold transition ${
-                  active ? "text-[#84a98c]" : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                <span className="block">{item.label}</span>
-                {active && <span className="mx-auto mt-1 block h-1 w-6 rounded-full bg-[#84a98c]" />}
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+          {tab === "stats" && <StatsView logs={logs} medications={medications} />}
+        </main>
+
+        <nav
+          aria-label="주요 메뉴"
+          className="fixed bottom-0 left-0 right-0 z-30 border-t border-emerald-900/10 bg-white/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
+        >
+          <div className="mx-auto grid max-w-2xl grid-cols-3">
+            {(
+              [
+                { id: "quick", label: "투약 기록" },
+                { id: "timeline", label: "타임라인" },
+                { id: "stats", label: "패턴 통계" }
+              ] as const
+            ).map((item) => {
+              const active = tab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setTab(item.id)}
+                  className={`py-3.5 text-center text-xs font-semibold transition ${
+                    active ? "text-emerald-700" : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  <span className="block">{item.label}</span>
+                  {active && <span className="mx-auto mt-1 block h-1 w-6 rounded-full bg-emerald-600" />}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+      </div>
 
       {warningMed && (
         <SafetyWarningModal

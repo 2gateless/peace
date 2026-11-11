@@ -19,28 +19,26 @@ export function Header({
   onSignOut
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 border-b border-[#84a98c]/10 bg-[#090d16]/85 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2.5">
+    <header className="sticky top-0 z-30 border-b border-emerald-900/10 bg-white/75 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-2.5">
+        <div className="flex items-center gap-2">
           <PeaceDoveIcon className="h-8 w-8 shrink-0" />
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-semibold tracking-tight text-slate-100">peace</span>
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-semibold tracking-tight text-slate-800">peace</span>
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                firebaseConfigured && user && !user.isMock
+                  ? "bg-emerald-100 text-emerald-800"
+                  : "bg-sky-100 text-slate-600"
+              }`}
+            >
               <span
-                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                  firebaseConfigured && user && !user.isMock
-                    ? "bg-[#84a98c]/15 text-[#84a98c]"
-                    : "bg-slate-800/90 text-slate-400"
+                className={`h-1.5 w-1.5 rounded-full ${
+                  firebaseConfigured && user && !user.isMock ? "bg-emerald-500" : "bg-amber-500"
                 }`}
-              >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    firebaseConfigured && user && !user.isMock ? "bg-[#84a98c]" : "bg-amber-400/80"
-                  }`}
-                />
-                {firebaseConfigured && user && !user.isMock ? "Firestore 동기화" : "로컬 저장"}
-              </span>
-            </div>
+              />
+              {firebaseConfigured && user && !user.isMock ? "동기화 중" : "로컬"}
+            </span>
           </div>
         </div>
 
@@ -49,7 +47,7 @@ export function Header({
             <button
               type="button"
               onClick={onInstallPwa}
-              className="rounded-full border border-[#84a98c]/30 bg-[#84a98c]/10 px-3 py-1.5 text-xs font-medium text-[#cad2c5] transition hover:bg-[#84a98c]/20"
+              className="rounded-full border border-emerald-700/20 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-800 transition hover:bg-emerald-100"
             >
               앱 설치
             </button>
@@ -60,12 +58,12 @@ export function Header({
               type="button"
               onClick={onSignOut}
               title="로그아웃"
-              className="flex items-center gap-2 rounded-full border border-slate-700/70 bg-slate-900/80 px-2.5 py-1 text-xs text-slate-300 transition hover:border-[#84a98c]/40 hover:text-white"
+              className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-xs text-slate-700 shadow-xs transition hover:border-emerald-400"
             >
               {user.photoURL ? (
                 <img src={user.photoURL} alt="" className="h-5 w-5 rounded-full" referrerPolicy="no-referrer" />
               ) : (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#52796f]/40 text-[10px] font-semibold text-[#cad2c5]">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-semibold text-emerald-800">
                   {(user.displayName || user.email || "G").slice(0, 1).toUpperCase()}
                 </span>
               )}
@@ -75,7 +73,7 @@ export function Header({
             <button
               type="button"
               onClick={onSignIn}
-              className="flex items-center gap-1.5 rounded-full border border-[#84a98c]/35 bg-[#0f172a] px-3 py-1.5 text-xs font-medium text-slate-100 transition hover:border-[#84a98c] hover:bg-[#84a98c]/15"
+              className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs transition hover:border-emerald-500 hover:bg-emerald-50"
             >
               <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

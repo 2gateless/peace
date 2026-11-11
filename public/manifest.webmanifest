@@ -1,11 +1,11 @@
 {
   "name": "peace",
   "short_name": "peace",
-  "description": "두통 및 투약 관리 PWA",
+  "description": "평화로운 두통 및 투약 관리 PWA",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#090d16",
-  "theme_color": "#090d16",
+  "background_color": "#eef6fa",
+  "theme_color": "#e6f2fa",
   "icons": [
     {
       "src": "./peace-icon.svg",

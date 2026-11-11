@@ -16,3 +16,4 @@ export function PeaceDoveIcon({ className = "w-7 h-7" }: { className?: string })
     </svg>
   );
 }
+

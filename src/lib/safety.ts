@@ -231,7 +231,8 @@ export function exportLogsToJson(logs: DoseLog[], medications: Medication[]): st
 }
 
 export function painScaleColor(scale: number): string {
-  if (scale <= 3) return "#84a98c";
-  if (scale <= 6) return "#eab308";
-  return "#ef4444";
+  if (scale <= 3) return "#3f8f6b";
+  if (scale <= 6) return "#d97706";
+  return "#c2410c";
 }
+
