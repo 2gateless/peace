@@ -3,9 +3,9 @@ export type AppTab = "quick" | "timeline" | "stats";
 const TAB_ORDER: AppTab[] = ["quick", "timeline", "stats"];
 
 /**
- * Resolves horizontal swipe tab transition.
- * Swiping right (dx > 0) moves right across tabs (quick -> timeline -> stats);
- * swiping left (dx < 0) moves left back (stats -> timeline -> quick).
+ * Resolves circular horizontal swipe tab transition.
+ * Swiping right (dx > 0) advances right (quick -> timeline -> stats -> quick);
+ * swiping left (dx < 0) moves left (quick -> stats -> timeline -> quick).
  */
 export function resolveSwipeTab(
   currentTab: AppTab,
@@ -20,7 +20,8 @@ export function resolveSwipeTab(
   const idx = TAB_ORDER.indexOf(currentTab);
   if (idx === -1) return null;
 
-  const nextIdx = dx > 0 ? idx + 1 : idx - 1;
-  return TAB_ORDER[nextIdx] ?? null;
+  const step = dx > 0 ? 1 : -1;
+  const nextIdx = (idx + step + TAB_ORDER.length) % TAB_ORDER.length;
+  return TAB_ORDER[nextIdx];
 }
 
