@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type TouchEvent as ReactTouchEvent } from "react";
 import { Header } from "./components/Header";
 import {
   DoseDetailModal,
@@ -21,10 +21,11 @@ import {
   subscribeLogs,
   subscribeMedications
 } from "./lib/firebase";
+import { resolveSwipeTab, type AppTab } from "./lib/navigation";
 import { getMedicationSafetyStatus } from "./lib/safety";
 import { DEFAULT_MEDICATIONS, type AuthUser, type DoseLog, type Medication } from "./types";
 
-type Tab = "quick" | "timeline" | "stats";
+type Tab = AppTab;
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -44,6 +45,7 @@ export default function App() {
   const [detailTarget, setDetailTarget] = useState<{ med: Medication; editing: DoseLog | null } | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const swipeStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   useEffect(() => {
     const unsub = subscribeAuth(setUser);
@@ -102,6 +104,34 @@ export default function App() {
       window.history.replaceState({ peaceTab: nextTab }, "");
     }
     setTab(nextTab);
+  };
+
+  const hasOpenModal = Boolean(actionMed || warningMed || detailTarget || showSettings);
+
+  const handleMainTouchStart = (event: ReactTouchEvent<HTMLElement>) => {
+    if (hasOpenModal || event.touches.length !== 1) {
+      swipeStartRef.current = null;
+      return;
+    }
+    const targetTag = (event.target as HTMLElement | null)?.tagName;
+    if (targetTag === "INPUT" || targetTag === "TEXTAREA" || targetTag === "SELECT") {
+      swipeStartRef.current = null;
+      return;
+    }
+    const touch = event.touches[0];
+    swipeStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+  };
+
+  const handleMainTouchEnd = (event: ReactTouchEvent<HTMLElement>) => {
+    const start = swipeStartRef.current;
+    swipeStartRef.current = null;
+    if (!start || hasOpenModal || event.changedTouches.length !== 1) return;
+
+    const touch = event.changedTouches[0];
+    const targetTab = resolveSwipeTab(tab, touch.clientX - start.x, touch.clientY - start.y, Date.now() - start.time);
+    if (targetTab) {
+      navigateTab(targetTab);
+    }
   };
 
   const showToast = (msg: string) => {
@@ -206,7 +236,14 @@ export default function App() {
           </div>
         )}
 
-        <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-[calc(5.75rem+env(safe-area-inset-bottom))] pt-4">
+        <main
+          onTouchStart={handleMainTouchStart}
+          onTouchEnd={handleMainTouchEnd}
+          onTouchCancel={() => {
+            swipeStartRef.current = null;
+          }}
+          className="mx-auto flex w-full max-w-2xl flex-1 touch-pan-y flex-col px-4 pb-[calc(5.75rem+env(safe-area-inset-bottom))] pt-4"
+        >
           {tab === "quick" && (
             <QuickLogView
               medications={medications}
