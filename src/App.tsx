@@ -206,7 +206,7 @@ export default function App() {
           </div>
         )}
 
-        <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-24 pt-4">
+        <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-3">
           {tab === "quick" && (
             <QuickLogView
               medications={medications}

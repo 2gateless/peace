@@ -108,9 +108,9 @@ export function QuickLogView({
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-9.5rem)] flex-col justify-between gap-2.5">
+    <div className="flex flex-col gap-3">
       {/* Compact peaceful overview */}
-      <section className="zen-card rounded-2xl px-4 py-3">
+      <section className="zen-card rounded-2xl px-4 py-2.5">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[11px] font-medium text-emerald-700">오늘의 평온</p>
@@ -143,14 +143,14 @@ export function QuickLogView({
         </div>
       </section>
 
-      {/* Mid-screen daily chart (~1.5x larger, gentle breathing room) */}
-      <section aria-label="일자별 투약 빈도 및 평균 통증" className="my-auto py-1">
+      {/* Mid-screen daily chart (~1.5x larger, stacked neatly without pushing tiles under nav) */}
+      <section aria-label="일자별 투약 빈도 및 평균 통증">
         <div className="zen-card rounded-2xl px-4 py-3">
-          <div className="mb-2 flex items-center justify-between">
+          <div className="mb-1.5 flex items-center justify-between">
             <h2 className="text-xs font-medium text-slate-700">일자별 투약 빈도 & 평균 통증</h2>
             <span className="text-[10px] text-slate-400">최근 7일</span>
           </div>
-          <div className="h-44 sm:h-48">
+          <div className="h-40 sm:h-44">
             <DailyFrequencyPainChart dailySeries={weeklyStats.dailySeries} compact />
           </div>
         </div>
