@@ -85,7 +85,7 @@ export function StatsView({ logs, medications }: StatsViewProps) {
   }, [stats.byMedication]);
 
   return (
-    <div className="space-y-2.5">
+    <div className="flex flex-1 flex-col justify-between gap-3.5">
       <div className="zen-card relative z-20 flex flex-wrap items-center justify-between gap-1.5 rounded-2xl px-3.5 py-2.5">
         <div>
           <h2 className="text-sm font-semibold text-slate-800">패턴 통계</h2>
@@ -188,19 +188,19 @@ export function StatsView({ logs, medications }: StatsViewProps) {
         </div>
       </div>
 
-      <div className="zen-card rounded-2xl px-3.5 py-2.5">
-        <h3 className="mb-1.5 text-xs font-medium text-slate-700">일자별 투약 빈도 & 평균 통증</h3>
-        <div className="h-36 sm:h-44">
+      <div className="zen-card rounded-2xl px-4 py-3">
+        <h3 className="mb-2 text-xs font-medium text-slate-700">일자별 투약 빈도 & 평균 통증</h3>
+        <div className="h-44 sm:h-48">
           <DailyFrequencyPainChart dailySeries={stats.dailySeries} compact />
         </div>
       </div>
 
-      <div className="zen-card rounded-2xl px-3.5 py-2.5">
-        <h3 className="mb-1.5 text-xs font-medium text-slate-700">약물별 복용 비율</h3>
+      <div className="zen-card rounded-2xl px-4 py-3">
+        <h3 className="mb-2 text-xs font-medium text-slate-700">약물별 복용 비율</h3>
         {stats.byMedication.length === 0 ? (
-          <p className="py-8 text-center text-xs text-slate-400">해당 기간 데이터가 없습니다.</p>
+          <p className="py-12 text-center text-xs text-slate-400">해당 기간 데이터가 없습니다.</p>
         ) : (
-          <div className="h-36 sm:h-44">
+          <div className="h-44 sm:h-48">
             <canvas ref={ratioCanvasRef} />
           </div>
         )}
