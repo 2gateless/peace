@@ -1,96 +1,119 @@
 import { useEffect, useRef } from "react";
-import { Chart, registerables } from "chart.js";
+import { Chart } from "../lib/chartSetup";
 import type { StatsSummary } from "../lib/safety";
-
-Chart.register(...registerables);
 
 interface DailyFrequencyPainChartProps {
   dailySeries: StatsSummary["dailySeries"];
   compact?: boolean;
 }
 
-/** Combined bar (dose count) and line (average pain) daily chart. */
+/** Combined bar (dose count) and line (average pain) daily chart with persistent instance reuse. */
 export function DailyFrequencyPainChart({ dailySeries, compact = false }: DailyFrequencyPainChartProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const chartRef = useRef<Chart | null>(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
     const tickSize = compact ? 10 : 12;
     const isDense = dailySeries.length > 45;
-    const chart = new Chart(canvasRef.current, {
-      type: "bar",
-      data: {
-        labels: dailySeries.map((d) => d.label),
-        datasets: [
-          {
-            label: "투약 횟수",
-            data: dailySeries.map((d) => d.count),
-            backgroundColor: isDense ? "rgba(63, 143, 107, 0.72)" : "rgba(63, 143, 107, 0.55)",
-            borderColor: "#3f8f6b",
-            borderWidth: isDense ? 0 : 1,
-            borderRadius: isDense ? 2 : compact ? 4 : 6,
-            barPercentage: isDense ? 0.9 : compact ? 0.55 : 0.7
-          },
-          {
-            type: "line",
-            label: "평균 통증",
-            data: dailySeries.map((d) => d.avgPain),
-            borderColor: "#d97706",
-            backgroundColor: "#d97706",
-            pointRadius: isDense ? 1.5 : compact ? 2.5 : 3,
-            borderWidth: compact || isDense ? 1.75 : 2,
-            spanGaps: true,
-            tension: 0.3,
-            yAxisID: "yPain"
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            ticks: {
-              color: "#475569",
-              maxRotation: 0,
-              autoSkip: true,
-              maxTicksLimit: compact ? 5 : 7,
-              font: { size: tickSize }
+
+    if (!chartRef.current) {
+      chartRef.current = new Chart(canvas, {
+        type: "bar",
+        data: {
+          labels: dailySeries.map((d) => d.label),
+          datasets: [
+            {
+              label: "투약 횟수",
+              data: dailySeries.map((d) => d.count),
+              backgroundColor: isDense ? "rgba(63, 143, 107, 0.72)" : "rgba(63, 143, 107, 0.55)",
+              borderColor: "#3f8f6b",
+              borderWidth: isDense ? 0 : 1,
+              borderRadius: isDense ? 2 : compact ? 4 : 6,
+              barPercentage: isDense ? 0.9 : compact ? 0.55 : 0.7
             },
-            grid: { display: false }
-          },
-          y: {
-            beginAtZero: true,
-            ticks: { color: "#3f8f6b", stepSize: 1, font: { size: tickSize } },
-            grid: { color: "rgba(100, 116, 139, 0.12)" }
-          },
-          yPain: {
-            position: "right",
-            min: 0,
-            max: 10,
-            ticks: { color: "#d97706", stepSize: compact ? 5 : undefined, font: { size: tickSize } },
-            grid: { display: false }
-          }
+            {
+              type: "line",
+              label: "평균 통증",
+              data: dailySeries.map((d) => d.avgPain),
+              borderColor: "#d97706",
+              backgroundColor: "#d97706",
+              pointRadius: isDense ? 1.5 : compact ? 2.5 : 3,
+              borderWidth: compact || isDense ? 1.75 : 2,
+              spanGaps: true,
+              tension: 0.3,
+              yAxisID: "yPain"
+            }
+          ]
         },
-        plugins: {
-          legend: {
-            labels: {
-              color: "#334155",
-              boxWidth: compact ? 9 : 12,
-              padding: compact ? 8 : 12,
-              font: { size: compact ? 10 : 12 }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: {
+                color: "#475569",
+                maxRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: compact ? 5 : 7,
+                font: { size: tickSize }
+              },
+              grid: { display: false }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: "#3f8f6b", stepSize: 1, font: { size: tickSize } },
+              grid: { color: "rgba(100, 116, 139, 0.12)" }
+            },
+            yPain: {
+              position: "right",
+              min: 0,
+              max: 10,
+              ticks: { color: "#d97706", stepSize: compact ? 5 : undefined, font: { size: tickSize } },
+              grid: { display: false }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: "#334155",
+                boxWidth: compact ? 9 : 12,
+                padding: compact ? 8 : 12,
+                font: { size: compact ? 10 : 12 }
+              }
             }
           }
         }
-      }
-    });
+      });
+      return;
+    }
 
-    return () => {
-      chart.destroy();
-    };
+    const chart = chartRef.current;
+    chart.data.labels = dailySeries.map((d) => d.label);
+
+    const barDs = chart.data.datasets[0] as unknown as Record<string, unknown>;
+    barDs.data = dailySeries.map((d) => d.count);
+    barDs.backgroundColor = isDense ? "rgba(63, 143, 107, 0.72)" : "rgba(63, 143, 107, 0.55)";
+    barDs.borderWidth = isDense ? 0 : 1;
+    barDs.borderRadius = isDense ? 2 : compact ? 4 : 6;
+    barDs.barPercentage = isDense ? 0.9 : compact ? 0.55 : 0.7;
+
+    const lineDs = chart.data.datasets[1] as unknown as Record<string, unknown>;
+    lineDs.data = dailySeries.map((d) => d.avgPain);
+    lineDs.pointRadius = isDense ? 1.5 : compact ? 2.5 : 3;
+    lineDs.borderWidth = compact || isDense ? 1.75 : 2;
+
+    chart.update("none");
   }, [dailySeries, compact]);
+
+  useEffect(() => {
+    return () => {
+      chartRef.current?.destroy();
+      chartRef.current = null;
+    };
+  }, []);
 
   return <canvas ref={canvasRef} />;
 }
-

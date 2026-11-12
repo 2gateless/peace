@@ -49,7 +49,7 @@ export function SafetyWarningModal({
           )}
           {status.isAtDailyLimit && (
             <p className="text-orange-700">
-              오늘 권장 최대 횟수({medication.dailyMaxLimit}회)에 이미 도달했습니다 (현재 {status.dailyCount}회).
+              최근 24시간 권장 최대 횟수({medication.dailyMaxLimit}회)에 이미 도달했습니다 (최근 24시간 {status.rolling24hCount}회).
             </p>
           )}
           <p className="text-xs text-slate-500">그래도 지금 복용 기록을 추가할까요?</p>
@@ -418,7 +418,7 @@ export function MedicationActionModal({
           <div className="rounded-2xl bg-amber-50/90 px-3 py-2 text-xs text-amber-800">
             {status.isWithinInterval
               ? `권장 간격(${medication.minIntervalHours}시간) 중 · ${status.formattedRemaining} 남음`
-              : `오늘 권장 최대 횟수(${medication.dailyMaxLimit}회)에 도달했습니다`}
+              : `최근 24시간 권장 최대 횟수(${medication.dailyMaxLimit}회)에 도달했습니다`}
           </div>
         )}
 

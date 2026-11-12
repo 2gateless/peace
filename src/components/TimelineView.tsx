@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { exportLogsToCsv, exportLogsToJson, groupLogsByDay, painScaleColor } from "../lib/safety";
 import type { DoseLog, Medication } from "../types";
 
@@ -21,6 +22,7 @@ function downloadTextFile(filename: string, content: string, mimeType: string) {
 }
 
 export function TimelineView({ logs, medications, onEditLog, onDeleteLog }: TimelineViewProps) {
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const dayGroups = groupLogsByDay(logs);
   const timeFmt = new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
 
@@ -115,13 +117,35 @@ export function TimelineView({ logs, medications, onEditLog, onDeleteLog }: Time
                         >
                           수정
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => onDeleteLog(log.id)}
-                          className="rounded-lg px-2 py-1 text-xs text-orange-700 hover:bg-orange-50"
-                        >
-                          삭제
-                        </button>
+                        {confirmDeleteId === log.id ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setConfirmDeleteId(null);
+                                onDeleteLog(log.id);
+                              }}
+                              className="rounded-lg bg-orange-600 px-2 py-1 text-xs font-semibold text-white hover:bg-orange-700"
+                            >
+                              확인
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="rounded-lg px-1.5 py-1 text-xs text-slate-500 hover:bg-slate-100"
+                            >
+                              취소
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDeleteId(log.id)}
+                            className="rounded-lg px-2 py-1 text-xs text-orange-700 hover:bg-orange-50"
+                          >
+                            삭제
+                          </button>
+                        )}
                       </div>
                     </div>
                   </li>

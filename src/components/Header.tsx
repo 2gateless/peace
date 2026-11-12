@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import type { AuthUser } from "../types";
 import { PeaceDoveIcon } from "./PeaceDoveIcon";
 
@@ -18,6 +19,24 @@ export function Header({
   onSignIn,
   onSignOut
 }: HeaderProps) {
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+    const handleOutside = (event: MouseEvent | TouchEvent) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+    };
+  }, [accountMenuOpen]);
+
   return (
     <header className="sticky top-0 z-30 border-b border-emerald-900/10 bg-white/75 backdrop-blur-xl">
       <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-2">
@@ -56,21 +75,48 @@ export function Header({
           )}
 
           {user ? (
-            <button
-              type="button"
-              onClick={onSignOut}
-              title="로그아웃"
-              className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-xs text-slate-700 shadow-xs transition hover:border-emerald-400"
-            >
-              {user.photoURL ? (
-                <img src={user.photoURL} alt="" className="h-5 w-5 rounded-full" referrerPolicy="no-referrer" />
-              ) : (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-semibold text-emerald-800">
-                  {(user.displayName || user.email || "G").slice(0, 1).toUpperCase()}
-                </span>
+            <div ref={accountMenuRef} className="relative">
+              <button
+                type="button"
+                aria-expanded={accountMenuOpen}
+                onClick={() => setAccountMenuOpen((prev) => !prev)}
+                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-xs text-slate-700 shadow-xs transition hover:border-emerald-400"
+              >
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="" className="h-5 w-5 rounded-full" referrerPolicy="no-referrer" />
+                ) : (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-semibold text-emerald-800">
+                    {(user.displayName || user.email || "G").slice(0, 1).toUpperCase()}
+                  </span>
+                )}
+                <span className="max-w-[110px] truncate">{user.email || user.displayName}</span>
+              </button>
+
+              {accountMenuOpen && (
+                <div className="absolute right-0 top-full z-40 mt-2 w-40 rounded-2xl border border-emerald-100 bg-white/95 p-2 shadow-xl backdrop-blur">
+                  <p className="truncate px-2 py-1 text-[11px] text-slate-500">
+                    {user.email || user.displayName}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAccountMenuOpen(false);
+                      onSignOut();
+                    }}
+                    className="mt-1 w-full rounded-xl bg-orange-50 px-3 py-1.5 text-left text-xs font-semibold text-orange-700 transition hover:bg-orange-100"
+                  >
+                    로그아웃
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAccountMenuOpen(false)}
+                    className="mt-1 w-full rounded-xl px-3 py-1 text-left text-[11px] text-slate-500 hover:bg-slate-50"
+                  >
+                    취소
+                  </button>
+                </div>
               )}
-              <span className="max-w-[110px] truncate">{user.email || user.displayName}</span>
-            </button>
+            </div>
           ) : (
             <button
               type="button"

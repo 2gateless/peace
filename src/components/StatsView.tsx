@@ -1,10 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { Chart, registerables } from "chart.js";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Chart } from "../lib/chartSetup";
 import { computeStats, type StatsPeriod } from "../lib/safety";
 import type { DoseLog, Medication } from "../types";
 import { DailyFrequencyPainChart } from "./DailyFrequencyPainChart";
-
-Chart.register(...registerables);
 
 interface StatsViewProps {
   logs: DoseLog[];
@@ -29,8 +27,9 @@ export function StatsView({ logs, medications }: StatsViewProps) {
   const [customMenuOpen, setCustomMenuOpen] = useState(false);
   const customMenuRef = useRef<HTMLDivElement | null>(null);
   const ratioCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const ratioChartRef = useRef<Chart | null>(null);
 
-  const stats = computeStats(logs, medications, period);
+  const stats = useMemo(() => computeStats(logs, medications, period), [logs, medications, period]);
   const isCustomPeriod = typeof period === "string";
   const selectedCustom = CUSTOM_PERIODS.find((p) => p.id === period) ?? null;
 
@@ -50,16 +49,24 @@ export function StatsView({ logs, medications }: StatsViewProps) {
   }, [customMenuOpen]);
 
   useEffect(() => {
-    let ratioChart: Chart | null = null;
+    const canvas = ratioCanvasRef.current;
+    if (!canvas || stats.byMedication.length === 0) {
+      ratioChartRef.current?.destroy();
+      ratioChartRef.current = null;
+      return;
+    }
 
-    if (ratioCanvasRef.current && stats.byMedication.length > 0) {
-      ratioChart = new Chart(ratioCanvasRef.current, {
+    const labels = stats.byMedication.map((m) => m.name);
+    const data = stats.byMedication.map((m) => m.count);
+
+    if (!ratioChartRef.current) {
+      ratioChartRef.current = new Chart(canvas, {
         type: "doughnut",
         data: {
-          labels: stats.byMedication.map((m) => m.name),
+          labels,
           datasets: [
             {
-              data: stats.byMedication.map((m) => m.count),
+              data,
               backgroundColor: ["#3f8f6b", "#6ab394", "#a3d4b8", "#3b82c4", "#7dd3fc"],
               borderColor: "#ffffff",
               borderWidth: 2
@@ -77,12 +84,21 @@ export function StatsView({ logs, medications }: StatsViewProps) {
           }
         }
       });
+      return;
     }
 
-    return () => {
-      ratioChart?.destroy();
-    };
+    const chart = ratioChartRef.current;
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = data;
+    chart.update("none");
   }, [stats.byMedication]);
+
+  useEffect(() => {
+    return () => {
+      ratioChartRef.current?.destroy();
+      ratioChartRef.current = null;
+    };
+  }, []);
 
   return (
     <div className="flex flex-1 flex-col justify-between gap-3.5">

@@ -66,11 +66,11 @@ function readLocal<T>(key: string, fallback: T): T {
   }
 }
 
-function writeLocal(key: string, value: unknown) {
+function writeLocal(key: string, value: unknown, ignoreError = false) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Ignore storage quota errors
+  } catch (err) {
+    if (!ignoreError) throw err;
   }
 }
 
@@ -128,7 +128,7 @@ export async function signInWithGoogle(): Promise<AuthUser | null> {
     photoURL: null,
     isMock: true
   };
-  writeLocal(LOCAL_MOCK_USER_KEY, mockUser);
+  writeLocal(LOCAL_MOCK_USER_KEY, mockUser, true);
   return mockUser;
 }
 
@@ -147,12 +147,16 @@ export function subscribeMedications(
   if (db && uid) {
     const ref = collection(db, "users", uid, "medications");
     const q = query(ref, orderBy("order", "asc"));
-    return onSnapshot(q, async (snap) => {
+    return onSnapshot(q, (snap) => {
       if (snap.empty) {
-        await Promise.all(
-          DEFAULT_MEDICATIONS.map((med) => setDoc(doc(db!, "users", uid, "medications", med.id), med))
-        );
         onData(DEFAULT_MEDICATIONS);
+        // Only seed defaults once server confirms the collection is truly empty;
+        // otherwise an empty local cache on a new device could overwrite cloud settings.
+        if (!snap.metadata.fromCache) {
+          void Promise.all(
+            DEFAULT_MEDICATIONS.map((med) => setDoc(doc(db!, "users", uid, "medications", med.id), med))
+          ).catch(() => undefined);
+        }
         return;
       }
       const list = snap.docs.map((d) => ({ ...(d.data() as Medication), id: d.id }));
@@ -163,7 +167,7 @@ export function subscribeMedications(
 
   const localMeds = readLocal<Medication[]>(LOCAL_MEDS_KEY, DEFAULT_MEDICATIONS);
   if (!localStorage.getItem(LOCAL_MEDS_KEY)) {
-    writeLocal(LOCAL_MEDS_KEY, DEFAULT_MEDICATIONS);
+    writeLocal(LOCAL_MEDS_KEY, DEFAULT_MEDICATIONS, true);
   }
   onData(localMeds);
   return () => {};

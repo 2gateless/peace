@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { computeStats, formatElapsed, getMedicationSafetyStatus, getStartOfTodayMs } from "../lib/safety";
 import type { DoseLog, Medication } from "../types";
 import { DailyFrequencyPainChart } from "./DailyFrequencyPainChart";
@@ -24,7 +25,10 @@ export function QuickLogView({
   const startOfToday = getStartOfTodayMs(nowMs);
   const todayLogs = logs.filter((l) => l.timestamp >= startOfToday);
   const latestLog = [...logs].sort((a, b) => b.timestamp - a.timestamp)[0] ?? null;
-  const weeklyStats = computeStats(logs, medications, 7, nowMs);
+  const weeklyStats = useMemo(
+    () => computeStats(logs, medications, 7, startOfToday),
+    [logs, medications, startOfToday]
+  );
 
   const herbs = medications.filter((m) => m.category === "herb");
   const painkillers = medications.filter((m) => m.category !== "herb");

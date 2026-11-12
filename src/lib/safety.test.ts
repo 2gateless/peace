@@ -132,5 +132,29 @@ describe("peace safety & analytics helpers", () => {
     expect(twoYears.totalCount).toBe(4);
     expect(twoYears.avgPainScale).toBe(5);
   });
+
+  it("enforces dailyMaxLimit over a rolling 24-hour window across midnight", () => {
+    const prevEvening = new Date(2026, 10, 10, 20, 0, 0).getTime();
+    const afterMidnight = new Date(2026, 10, 11, 5, 0, 0).getTime(); // 9h later, past 4h interval
+
+    const logs: DoseLog[] = [
+      { id: "n1", timestamp: prevEvening, medicationId: med.id, medicationName: med.name, category: med.category },
+      { id: "n2", timestamp: prevEvening + 1 * 3600000, medicationId: med.id, medicationName: med.name, category: med.category },
+      { id: "n3", timestamp: prevEvening + 2 * 3600000, medicationId: med.id, medicationName: med.name, category: med.category },
+      { id: "n4", timestamp: prevEvening + 3.5 * 3600000, medicationId: med.id, medicationName: med.name, category: med.category }
+    ];
+
+    const status = getMedicationSafetyStatus(logs, med, afterMidnight);
+    expect(status.dailyCount).toBe(0);
+    expect(status.rolling24hCount).toBe(4);
+    expect(status.isWithinInterval).toBe(false);
+    expect(status.isAtDailyLimit).toBe(true);
+    expect(status.needsWarning).toBe(true);
+
+    const nextNight = prevEvening + 24 * 3600000;
+    const clearedStatus = getMedicationSafetyStatus(logs, med, nextNight);
+    expect(clearedStatus.rolling24hCount).toBe(3);
+    expect(clearedStatus.isAtDailyLimit).toBe(false);
+  });
 });
 

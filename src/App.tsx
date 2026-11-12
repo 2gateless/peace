@@ -34,6 +34,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 export default function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [authReady, setAuthReady] = useState(!isFirebaseConfigured);
   const [medications, setMedications] = useState<Medication[]>(DEFAULT_MEDICATIONS);
   const [logs, setLogs] = useState<DoseLog[]>([]);
   const [tab, setTab] = useState<Tab>("quick");
@@ -48,11 +49,15 @@ export default function App() {
   const swipeStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   useEffect(() => {
-    const unsub = subscribeAuth(setUser);
+    const unsub = subscribeAuth((nextUser) => {
+      setUser(nextUser);
+      setAuthReady(true);
+    });
     return unsub;
   }, []);
 
   useEffect(() => {
+    if (!authReady) return;
     const uid = user && !user.isMock ? user.uid : null;
     const unsubMeds = subscribeMedications(uid, setMedications);
     const unsubLogs = subscribeLogs(uid, setLogs);
@@ -60,7 +65,7 @@ export default function App() {
       unsubMeds();
       unsubLogs();
     };
-  }, [user]);
+  }, [authReady, user]);
 
   useEffect(() => {
     const id = setInterval(() => setNowMs(Date.now()), 30000);
@@ -141,7 +146,7 @@ export default function App() {
 
   const activeUid = user && !user.isMock ? user.uid : null;
 
-  const commitDose = async (
+  const commitDose = (
     med: Medication,
     opts?: { id?: string; timestamp?: number; dose?: string; painScale?: number | null; notes?: string }
   ) => {
@@ -156,7 +161,6 @@ export default function App() {
       notes: opts?.notes || ""
     };
 
-    await saveDoseLog(activeUid, log);
     if (!activeUid) {
       setLogs((prev) =>
         (prev.some((l) => l.id === log.id)
@@ -167,6 +171,11 @@ export default function App() {
     }
     setNowMs(Date.now());
     showToast(`${med.name} 기록되었습니다`);
+
+    // Do not await server ack so offline Firestore cache writes keep UI responsive.
+    void saveDoseLog(activeUid, log).catch(() => {
+      showToast("저장에 실패했습니다. 저장 공간 또는 권한을 확인하세요");
+    });
   };
 
   const handleQuickTap = (med: Medication) => {
@@ -175,7 +184,7 @@ export default function App() {
       setWarningMed(med);
       return;
     }
-    void commitDose(med);
+    commitDose(med);
   };
 
   const handleSignIn = async () => {
@@ -189,24 +198,34 @@ export default function App() {
   };
 
   const handleSignOut = async () => {
-    await signOutUser();
-    setUser(null);
-    showToast("로그아웃되었습니다");
+    try {
+      await signOutUser();
+      setUser(null);
+      showToast("로그아웃되었습니다");
+    } catch {
+      showToast("로그아웃에 실패했습니다");
+    }
   };
 
-  const handleSaveMedications = async (updated: Medication[]) => {
-    await Promise.all(updated.map((m) => saveMedication(activeUid, m)));
+  const handleSaveMedications = (updated: Medication[]) => {
     setMedications(updated);
     setShowSettings(false);
     showToast("약물 설정이 저장되었습니다");
+
+    void Promise.all(updated.map((m) => saveMedication(activeUid, m))).catch(() => {
+      showToast("약물 설정 저장에 실패했습니다");
+    });
   };
 
-  const handleDeleteLog = async (logId: string) => {
-    await deleteDoseLog(activeUid, logId);
+  const handleDeleteLog = (logId: string) => {
     if (!activeUid) {
       setLogs((prev) => prev.filter((l) => l.id !== logId));
     }
     showToast("기록을 삭제했습니다");
+
+    void deleteDoseLog(activeUid, logId).catch(() => {
+      showToast("기록 삭제에 실패했습니다");
+    });
   };
 
   const handleInstallPwa = async () => {
@@ -244,31 +263,41 @@ export default function App() {
           }}
           className="mx-auto flex w-full max-w-2xl flex-1 touch-pan-y flex-col px-4 pb-[calc(5.75rem+env(safe-area-inset-bottom))] pt-4"
         >
-          {tab === "quick" && (
-            <QuickLogView
-              medications={medications}
-              logs={logs}
-              nowMs={nowMs}
-              onSelectMedication={(med) => setActionMed(med)}
-              onOpenDetailed={(med) => setDetailTarget({ med, editing: null })}
-              onOpenHeadacheOnly={() => setDetailTarget({ med: medications[0], editing: null })}
-              onOpenMedSettings={() => setShowSettings(true)}
-            />
-          )}
+          {!authReady ? (
+            <div className="my-auto flex justify-center">
+              <div className="zen-card rounded-2xl px-6 py-4 text-xs font-medium text-slate-500">
+                연결 확인 중...
+              </div>
+            </div>
+          ) : (
+            <>
+              {tab === "quick" && (
+                <QuickLogView
+                  medications={medications}
+                  logs={logs}
+                  nowMs={nowMs}
+                  onSelectMedication={(med) => setActionMed(med)}
+                  onOpenDetailed={(med) => setDetailTarget({ med, editing: null })}
+                  onOpenHeadacheOnly={() => setDetailTarget({ med: medications[0], editing: null })}
+                  onOpenMedSettings={() => setShowSettings(true)}
+                />
+              )}
 
-          {tab === "timeline" && (
-            <TimelineView
-              logs={logs}
-              medications={medications}
-              onEditLog={(log) => {
-                const med = medications.find((m) => m.id === log.medicationId) || medications[0];
-                setDetailTarget({ med, editing: log });
-              }}
-              onDeleteLog={(id) => void handleDeleteLog(id)}
-            />
-          )}
+              {tab === "timeline" && (
+                <TimelineView
+                  logs={logs}
+                  medications={medications}
+                  onEditLog={(log) => {
+                    const med = medications.find((m) => m.id === log.medicationId) || medications[0];
+                    setDetailTarget({ med, editing: log });
+                  }}
+                  onDeleteLog={(id) => handleDeleteLog(id)}
+                />
+              )}
 
-          {tab === "stats" && <StatsView logs={logs} medications={medications} />}
+              {tab === "stats" && <StatsView logs={logs} medications={medications} />}
+            </>
+          )}
         </main>
 
         <nav
@@ -323,7 +352,7 @@ export default function App() {
             setActionMed(null);
             setDetailTarget({ med, editing: log });
           }}
-          onDeleteLog={(id) => void handleDeleteLog(id)}
+          onDeleteLog={(id) => handleDeleteLog(id)}
         />
       )}
 
@@ -335,7 +364,7 @@ export default function App() {
           onConfirm={() => {
             const med = warningMed;
             setWarningMed(null);
-            void commitDose(med);
+            commitDose(med);
           }}
         />
       )}
@@ -348,7 +377,7 @@ export default function App() {
           onClose={() => setDetailTarget(null)}
           onSave={(payload) => {
             setDetailTarget(null);
-            void commitDose(payload.medication, {
+            commitDose(payload.medication, {
               id: payload.id,
               timestamp: payload.timestamp,
               dose: payload.dose,
@@ -363,7 +392,7 @@ export default function App() {
         <MedicationSettingsModal
           medications={medications}
           onClose={() => setShowSettings(false)}
-          onSaveAll={(updated) => void handleSaveMedications(updated)}
+          onSaveAll={(updated) => handleSaveMedications(updated)}
         />
       )}
     </div>

@@ -8,6 +8,7 @@ export interface MedicationSafetyStatus {
   remainingMs: number;
   formattedRemaining: string;
   dailyCount: number;
+  rolling24hCount: number;
   isAtDailyLimit: boolean;
   needsWarning: boolean;
 }
@@ -67,6 +68,11 @@ export function getTodayCount(logs: DoseLog[], medicationId: string, nowMs = Dat
   return logs.filter((l) => l.medicationId === medicationId && l.timestamp >= startOfDay).length;
 }
 
+export function getRolling24hCount(logs: DoseLog[], medicationId: string, nowMs = Date.now()): number {
+  const cutoffMs = nowMs - 24 * 3600000;
+  return logs.filter((l) => l.medicationId === medicationId && l.timestamp > cutoffMs).length;
+}
+
 export function getMedicationSafetyStatus(
   logs: DoseLog[],
   medication: Medication,
@@ -81,7 +87,8 @@ export function getMedicationSafetyStatus(
   const isWithinInterval = elapsedMs !== null && medication.minIntervalHours > 0 && elapsedMs < minIntervalMs;
   const remainingMs = isWithinInterval && elapsedMs !== null ? minIntervalMs - elapsedMs : 0;
   const dailyCount = getTodayCount(logs, medication.id, nowMs);
-  const isAtDailyLimit = medication.dailyMaxLimit > 0 && dailyCount >= medication.dailyMaxLimit;
+  const rolling24hCount = getRolling24hCount(logs, medication.id, nowMs);
+  const isAtDailyLimit = medication.dailyMaxLimit > 0 && rolling24hCount >= medication.dailyMaxLimit;
 
   return {
     lastLog,
@@ -91,6 +98,7 @@ export function getMedicationSafetyStatus(
     remainingMs,
     formattedRemaining: isWithinInterval ? formatRemaining(remainingMs) : "",
     dailyCount,
+    rolling24hCount,
     isAtDailyLimit,
     needsWarning: isWithinInterval || isAtDailyLimit
   };

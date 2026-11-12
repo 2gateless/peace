@@ -1,4 +1,4 @@
-const CACHE_NAME = "peace-v14";
+const CACHE_NAME = "peace-v15";
 const SHELL_URLS = ["./", "./index.html", "./manifest.webmanifest", "./peace-icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -22,6 +22,25 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
+  // Hashed Vite assets are immutable: serve cache-first for instant repeat loads.
+  if (url.pathname.includes("/assets/")) {
+    event.respondWith(
+      caches.match(event.request).then(
+        (cached) =>
+          cached ||
+          fetch(event.request).then((res) => {
+            if (res.ok) {
+              const copy = res.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+            }
+            return res;
+          })
+      )
+    );
+    return;
+  }
+
+  // Shell/document requests stay network-first so updates roll out promptly.
   event.respondWith(
     fetch(event.request)
       .then((res) => {
@@ -34,4 +53,3 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(event.request))
   );
 });
-
