@@ -187,10 +187,10 @@ export default function App() {
   };
 
   return (
-    <div className="peace-backdrop relative flex min-h-screen flex-col text-slate-800">
+    <div className="peace-backdrop relative flex min-h-[100dvh] flex-col text-slate-800">
       <PeaceScenery />
 
-      <div className="relative z-10 flex min-h-screen flex-col">
+      <div className="relative z-10 flex min-h-[100dvh] flex-col">
         <Header
           user={user}
           firebaseConfigured={isFirebaseConfigured}
@@ -206,7 +206,7 @@ export default function App() {
           </div>
         )}
 
-        <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-3">
+        <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-[calc(5.75rem+env(safe-area-inset-bottom))] pt-4">
           {tab === "quick" && (
             <QuickLogView
               medications={medications}

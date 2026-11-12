@@ -108,9 +108,9 @@ export function QuickLogView({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-1 flex-col justify-evenly gap-4">
       {/* Compact peaceful overview */}
-      <section className="zen-card rounded-2xl px-4 py-2.5">
+      <section className="zen-card rounded-2xl px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[11px] font-medium text-emerald-700">오늘의 평온</p>
@@ -157,7 +157,7 @@ export function QuickLogView({
       </section>
 
       {/* Thumb Zone: Row 1 (Herbs 3 in a row) + Row 2 (Painkillers 2 in a row) */}
-      <section aria-label="원클릭 투약 기록" className="space-y-2 pb-1">
+      <section aria-label="약물 투약 관리" className="space-y-2.5">
         {herbs.length > 0 && (
           <div className="grid grid-cols-3 gap-1.5">
             {herbs.map((med) => renderTile(med, true))}
