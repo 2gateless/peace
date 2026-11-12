@@ -70,7 +70,10 @@ export function StatsView({ logs, medications }: StatsViewProps) {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: "bottom", labels: { color: "#334155", boxWidth: 12 } }
+            legend: {
+              position: "right",
+              labels: { color: "#334155", boxWidth: 10, padding: 8, font: { size: 11 } }
+            }
           }
         }
       });
@@ -82,14 +85,14 @@ export function StatsView({ logs, medications }: StatsViewProps) {
   }, [stats.byMedication]);
 
   return (
-    <div className="space-y-4">
-      <div className="zen-card relative z-20 flex flex-wrap items-center justify-between gap-2 rounded-2xl p-4">
+    <div className="space-y-2.5">
+      <div className="zen-card relative z-20 flex flex-wrap items-center justify-between gap-1.5 rounded-2xl px-3.5 py-2.5">
         <div>
-          <h2 className="text-base font-semibold text-slate-800">패턴 통계</h2>
-          <p className="text-[11px] text-slate-500">{formatPeriodLabel(period)}</p>
+          <h2 className="text-sm font-semibold text-slate-800">패턴 통계</h2>
+          <p className="text-[10px] text-slate-500">{formatPeriodLabel(period)}</p>
         </div>
 
-        <div className="inline-flex items-center rounded-full bg-slate-100 p-1">
+        <div className="inline-flex items-center rounded-full bg-slate-100 p-0.5">
           {([7, 30] as const).map((days) => (
             <button
               key={days}
@@ -98,7 +101,7 @@ export function StatsView({ logs, medications }: StatsViewProps) {
                 setPeriod(days);
                 setCustomMenuOpen(false);
               }}
-              className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
+              className={`rounded-full px-2 py-1 text-[11px] font-medium transition ${
                 period === days ? "bg-emerald-600 text-white" : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -112,7 +115,7 @@ export function StatsView({ logs, medications }: StatsViewProps) {
               aria-expanded={customMenuOpen}
               aria-haspopup="listbox"
               onClick={() => setCustomMenuOpen((prev) => !prev)}
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition ${
+              className={`inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-[11px] font-medium transition ${
                 isCustomPeriod ? "bg-emerald-600 text-white" : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -166,38 +169,38 @@ export function StatsView({ logs, medications }: StatsViewProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2.5">
-        <div className="zen-card rounded-2xl p-3.5">
-          <p className="text-[11px] text-slate-500">총 투약</p>
-          <p className="mt-1 text-xl font-semibold text-emerald-700">{stats.totalCount}회</p>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="zen-card rounded-2xl px-3 py-2">
+          <p className="text-[10px] text-slate-500">총 투약</p>
+          <p className="mt-0.5 text-base font-semibold text-emerald-700">{stats.totalCount}회</p>
         </div>
-        <div className="zen-card rounded-2xl p-3.5">
-          <p className="text-[11px] text-slate-500">평균 통증</p>
-          <p className="mt-1 text-xl font-semibold text-amber-600">
+        <div className="zen-card rounded-2xl px-3 py-2">
+          <p className="text-[10px] text-slate-500">평균 통증</p>
+          <p className="mt-0.5 text-base font-semibold text-amber-600">
             {stats.avgPainScale !== null ? `${stats.avgPainScale}` : "—"}
           </p>
         </div>
-        <div className="zen-card rounded-2xl p-3.5">
-          <p className="text-[11px] text-slate-500">최다 복용</p>
-          <p className="mt-1 truncate text-sm font-semibold text-slate-800">
+        <div className="zen-card rounded-2xl px-3 py-2">
+          <p className="text-[10px] text-slate-500">최다 복용</p>
+          <p className="mt-0.5 truncate text-sm font-semibold text-slate-800">
             {stats.topMedicationName || "—"}
           </p>
         </div>
       </div>
 
-      <div className="zen-card rounded-3xl p-4">
-        <h3 className="mb-3 text-sm font-medium text-slate-700">일자별 투약 빈도 & 평균 통증</h3>
-        <div className="h-56">
-          <DailyFrequencyPainChart dailySeries={stats.dailySeries} />
+      <div className="zen-card rounded-2xl px-3.5 py-2.5">
+        <h3 className="mb-1.5 text-xs font-medium text-slate-700">일자별 투약 빈도 & 평균 통증</h3>
+        <div className="h-36 sm:h-44">
+          <DailyFrequencyPainChart dailySeries={stats.dailySeries} compact />
         </div>
       </div>
 
-      <div className="zen-card rounded-3xl p-4">
-        <h3 className="mb-3 text-sm font-medium text-slate-700">약물별 복용 비율</h3>
+      <div className="zen-card rounded-2xl px-3.5 py-2.5">
+        <h3 className="mb-1.5 text-xs font-medium text-slate-700">약물별 복용 비율</h3>
         {stats.byMedication.length === 0 ? (
-          <p className="py-12 text-center text-xs text-slate-400">해당 기간 데이터가 없습니다.</p>
+          <p className="py-8 text-center text-xs text-slate-400">해당 기간 데이터가 없습니다.</p>
         ) : (
-          <div className="h-56">
+          <div className="h-36 sm:h-44">
             <canvas ref={ratioCanvasRef} />
           </div>
         )}
