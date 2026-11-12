@@ -74,6 +74,36 @@ export default function App() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
+  useEffect(() => {
+    window.history.replaceState({ ...(window.history.state ?? {}), peaceTab: "quick" }, "");
+    const handlePopState = (event: PopStateEvent) => {
+      const nextTab = (event.state as { peaceTab?: Tab } | null)?.peaceTab;
+      setTab(nextTab === "timeline" || nextTab === "stats" ? nextTab : "quick");
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const navigateTab = (nextTab: Tab) => {
+    if (nextTab === tab) return;
+    if (nextTab === "quick") {
+      const currentStateTab = (window.history.state as { peaceTab?: Tab } | null)?.peaceTab;
+      if (currentStateTab === "timeline" || currentStateTab === "stats") {
+        window.history.back();
+        return;
+      }
+      setTab("quick");
+      return;
+    }
+
+    if (tab === "quick") {
+      window.history.pushState({ peaceTab: nextTab }, "");
+    } else {
+      window.history.replaceState({ peaceTab: nextTab }, "");
+    }
+    setTab(nextTab);
+  };
+
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast((curr) => (curr === msg ? null : curr)), 2600);
@@ -221,7 +251,7 @@ export default function App() {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setTab(item.id)}
+                  onClick={() => navigateTab(item.id)}
                   className={`py-3.5 text-center text-xs font-semibold transition ${
                     active ? "text-emerald-700" : "text-slate-500 hover:text-slate-800"
                   }`}

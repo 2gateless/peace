@@ -1,4 +1,4 @@
-const CACHE_NAME = "peace-v7";
+const CACHE_NAME = "peace-v8";
 const SHELL_URLS = ["./", "./index.html", "./manifest.webmanifest", "./peace-icon.svg"];
 
 self.addEventListener("install", (event) => {
