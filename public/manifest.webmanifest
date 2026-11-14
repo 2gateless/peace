@@ -4,14 +4,26 @@
   "description": "평화로운 두통 및 투약 관리 PWA",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#eef6fa",
+  "background_color": "#f0efeb",
   "theme_color": "#e6f2fa",
   "icons": [
     {
-      "src": "./peace-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
