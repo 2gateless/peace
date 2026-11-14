@@ -1,5 +1,5 @@
-const CACHE_NAME = "peace-v16";
-const SHELL_URLS = ["./", "./index.html", "./manifest.webmanifest", "./peace-icon.svg", "./peace-logo.png"];
+const CACHE_NAME = "peace-v17";
+const SHELL_URLS = ["./", "./index.html", "./manifest.webmanifest", "./peace-icon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import peaceLogo from "../assets/peace-logo.png";
 import type { AuthUser } from "../types";
 
 interface HeaderProps {
@@ -38,12 +39,12 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-30 border-b border-emerald-900/10 bg-white/75 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-2">
+      <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-1.5">
         <div className="flex items-center gap-2.5">
           <img
-            src="/peace-logo.png"
+            src={peaceLogo}
             alt="Peace"
-            className="h-8 w-auto object-contain select-none"
+            className="h-11 w-auto object-contain select-none"
           />
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
